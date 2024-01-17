@@ -1,0 +1,6 @@
+{
+    "verbose": true,
+    "watch": ["**/*.go", "./templates", "./src", "./public/output.css"],
+    "exec": "go run",
+    "ext": ".html,.go,.css,.js"
+}

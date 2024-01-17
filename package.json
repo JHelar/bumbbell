@@ -1,0 +1,20 @@
+{
+  "name": "dumbbell",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:JHelar/dumbbell.git"
+  },
+  "scripts": {
+    "dev": "./start.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.2.2",
+    "prettier-plugin-go-template": "^0.0.15"
+  }
+}

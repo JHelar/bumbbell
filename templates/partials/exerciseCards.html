@@ -1,0 +1,7 @@
+{{ define "exerciseCards" }}
+  <div class="flex gap-4 max-w-screen-md w-full p-6 mx-auto">
+    {{ range . }}
+      {{ template "exerciseCard" . }}
+    {{ end }}
+  </div>
+{{ end }}

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  {{ template "head" . }}
+  <body class="bg-zinc-800">
+    <main class="h-dvh overflow-y-clip" id="container">
+      {{ if .Exercise }}
+        {{ template "exercise" .Exercise }}
+      {{ else if .Exercises }}
+        {{ template "exerciseCards" .Exercises }}
+      {{ else if .Splits }}
+        {{ template "splitCards" .Splits }}
+      {{ end }}
+    </main>
+  </body>
+</html>
