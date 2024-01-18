@@ -7,36 +7,7 @@
       <div
         class="p-6 flex flex-col gap-y-2 bg-white border-x border-gray-200 dark:bg-gray-800 dark:border-gray-700"
       >
-        <ol class="flex items-center mb-4">
-          {{ range $index, $element := .Sets }}
-            <li class="relative w-full">
-              <div class="flex items-center">
-                {{ if eq $element "good" }}
-                  <div
-                    class="z-10 flex items-center justify-center w-6 h-6 bg-emerald-600 rounded-full ring-0 ring-white dark:bg-emerald-800 sm:ring-8 dark:ring-gray-900 shrink-0"
-                  ></div>
-                {{ else if eq $element "bad" }}
-                  <div
-                    class="z-10 flex items-center justify-center w-6 h-6 bg-rose-600 rounded-full ring-0 ring-white dark:bg-rose-800 sm:ring-8 dark:ring-gray-900 shrink-0"
-                  ></div>
-                {{ else if eq $element "current" }}
-                  <div
-                    class="z-10 flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full ring-0 ring-white dark:bg-blue-800 sm:ring-8 dark:ring-gray-900 shrink-0"
-                  ></div>
-                {{ else }}
-                  <div
-                    class="z-10 flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full ring-0 ring-white dark:bg-gray-700 sm:ring-8 dark:ring-gray-900 shrink-0"
-                  ></div>
-                {{ end }}
-                {{ if isNotLast $index $.Sets }}
-                  <div
-                    class="flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"
-                  ></div>
-                {{ end }}
-              </div>
-            </li>
-          {{ end }}
-        </ol>
+        {{ template "exerciseSets" .Sets }}
         <h2
           class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
@@ -81,8 +52,8 @@
           type="button"
           hx-post="/htmx/next"
           hx-trigger="click"
-          hx-target="#container"
-          hx-swap="innerHTML"
+          hx-target="#exercise-sets"
+          hx-swap="outerHTML"
           name="rating"
           value="bad"
           class="inline-flex place-items-center place-content-center w-full p-4 bg-gray-50 hover:bg-rose-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-rose-800"
@@ -105,8 +76,8 @@
         <button
           hx-post="/htmx/next"
           hx-trigger="click"
-          hx-target="#container"
-          hx-swap="innerHTML"
+          hx-target="#exercise-sets"
+          hx-swap="outerHTML"
           name="rating"
           value="good"
           type="button"

@@ -1,0 +1,24 @@
+[
+    {
+        "ID": 1,
+        "SplitID": 1,
+        "Name": "Millitary press",
+        "Description": "Barbell, squat rack",
+        "WeightFrom": 0.0,
+        "WeightTo": 7.25,
+        "RepsFrom": 12,
+        "RepsTo": 20,
+        "Sets": 5
+    },
+    {
+        "ID": 2,
+        "SplitID": 1,
+        "Name": "Shoulder press",
+        "Description": "Dumbbells with bench",
+        "WeightFrom": 16,
+        "WeightTo": 16,
+        "RepsFrom": 12,
+        "RepsTo": 12,
+        "Sets": 3
+    }
+]

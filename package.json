@@ -8,7 +8,7 @@
     "url": "git@github.com:JHelar/dumbbell.git"
   },
   "scripts": {
-    "dev": "./start.sh"
+    "dev": "./scripts/start.sh"
   },
   "keywords": [],
   "author": "",

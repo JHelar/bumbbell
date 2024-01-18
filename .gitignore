@@ -1,4 +1,4 @@
 node_modules
 public/output.css
-database.db
+db/database.db
 .vscode

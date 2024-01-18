@@ -1,5 +1,6 @@
 {
     "verbose": true,
+    "ignore": ["./db/**/*"],
     "watch": ["**/*.go", "./templates", "./src", "./public/output.css"],
     "exec": "go run",
     "ext": ".html,.go,.css,.js"
