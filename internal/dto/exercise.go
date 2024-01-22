@@ -2,6 +2,7 @@ package dto
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -15,6 +16,21 @@ type Exercise struct {
 	RepsFrom    float64
 	RepsTo      float64
 	Sets        int64
+}
+
+type ImageType string
+
+const (
+	ImageTypeJpeg ImageType = "jpeg"
+)
+
+type Image struct {
+	Content     []byte
+	ContentType ImageType
+}
+
+func (e *Exercise) GetImageURL() string {
+	return fmt.Sprintf("/exercise/image/%d", e.ID)
 }
 
 func GetAllExercises(splitId int64, db *sql.DB) ([]Exercise, error) {
@@ -51,7 +67,15 @@ func GetExercise(exerciseId int64, db *sql.DB) (Exercise, error) {
 }
 
 func GetAvailableExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exercise, error) {
-	rows, err := db.Query("SELECT * FROM exercises WHERE ID NOT IN (SELECT DISTINCT ExerciseID FROM workout_sets WHERE WorkoutID=?) AND SplitID=?", workoutId, splitId)
+	rows, err := db.Query(`
+	SELECT ID, SplitID, Name, Description, WeightFrom, WeightTo, RepsFrom, RepsTo, Sets FROM exercises 
+	WHERE ID NOT IN (
+		SELECT DISTINCT ExerciseID 
+		FROM workout_sets 
+		WHERE WorkoutID=?
+	) 
+	AND SplitID=?
+	`, workoutId, splitId)
 	if err != nil {
 		log.Printf("GetAvailableExercises Error: %s", err.Error())
 		return nil, err
@@ -68,4 +92,19 @@ func GetAvailableExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exerci
 	}
 
 	return exercises, err
+}
+
+func GetExerciseImage(exerciseId int64, db *sql.DB) (Image, error) {
+	row := db.QueryRow(`
+		SELECT Content, ContentType FROM images
+		WHERE ID=(
+			SELECT ImageID FROM exercises
+			WHERE ID=?
+		)
+	`, exerciseId)
+
+	image := Image{}
+	err := row.Scan(&image.Content, &image.ContentType)
+
+	return image, err
 }

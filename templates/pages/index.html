@@ -2,14 +2,17 @@
 <html lang="en">
   {{ template "head" . }}
   <body class="bg-zinc-800">
-    <main class="h-dvh overflow-y-clip" id="container">
-      {{ if .Exercise }}
-        {{ template "exercise" .Exercise }}
-      {{ else if .Exercises }}
-        {{ template "exerciseCards" .Exercises }}
-      {{ else if .Splits }}
-        {{ template "splitCards" .Splits }}
-      {{ end }}
+    <main class="h-dvh p-6">
+      <div id="container" hx-swap-oob="true">
+        {{ template "pageTitle" .PageTitle }}
+        {{ if .Exercise }}
+          {{ template "exercise" .Exercise }}
+        {{ else if .Exercises }}
+          {{ template "exerciseCards" .Exercises }}
+        {{ else if .Splits }}
+          {{ template "splitCards" .Splits }}
+        {{ end }}
+      </div>
     </main>
   </body>
 </html>

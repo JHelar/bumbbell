@@ -38,14 +38,14 @@ type WorkoutSet struct {
 	Sets        int64
 }
 
-func NewWorkout(splitId int64, userId int64, db *sql.DB) (Workout, error) {
-	activeWorkout, err := GetActiveWorkout(userId, db)
-	if err == nil {
-		return activeWorkout, nil
-	}
+var ErrorSetLimitReached = errors.New("Set limit reached")
+var ErrorWorkoutNotUpdated = errors.New("Workout not updated")
 
+func NewWorkout(splitId int64, userId int64, db *sql.DB) (Workout, error) {
 	row := db.QueryRow("INSERT INTO workouts (UserID, SplitID) VALUES (?,?) RETURNING ID, UserID, SplitID, StartedAt, CompletedAt", userId, splitId)
 	workout := Workout{}
+
+	var err error
 	if err = row.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
 		log.Printf("NewWorkout Error: %s", err.Error())
 	}
@@ -62,10 +62,25 @@ func GetActiveWorkout(userId int64, db *sql.DB) (Workout, error) {
 			log.Printf("GetActiveWorkout Error: %s", err.Error())
 		}
 	}
+
 	return workout, err
 }
 
-func NewSet(workoutId int64, exerciseId int64, db *sql.DB) (WorkoutSet, error) {
+func CompleteWorkout(workoutId int64, db *sql.DB) error {
+	result, err := db.Exec(`
+	UPDATE workouts
+	SET CompletedAt=CURRENT_TIMESTAMP
+	WHERE ID=? AND CompletedAt IS NULL
+	`, workoutId)
+
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return ErrorWorkoutNotUpdated
+	}
+
+	return err
+}
+
+func CreateNewSet(workoutId int64, exerciseId int64, db *sql.DB) (WorkoutSet, error) {
 	_, err := GetActiveWorkoutSet(workoutId, db)
 	if err == nil {
 		return WorkoutSet{}, errors.New("NewSet Error a set is allready active")
@@ -108,7 +123,7 @@ func NewSet(workoutId int64, exerciseId int64, db *sql.DB) (WorkoutSet, error) {
 	return workoutSet, nil
 }
 
-func NextSet(workoutId int64, rating SetStatus, db *sql.DB) (WorkoutSet, error) {
+func CreateNextSet(workoutId int64, rating SetStatus, db *sql.DB) (WorkoutSet, error) {
 	activeWorkoutSet, err := UpdateActiveWorkoutSet(workoutId, rating, db)
 	if err != nil {
 		return WorkoutSet{}, err
@@ -122,7 +137,7 @@ func NextSet(workoutId int64, rating SetStatus, db *sql.DB) (WorkoutSet, error) 
 	setNumber := activeWorkoutSet.SetNumber + 1
 	if setNumber > exercise.Sets {
 		log.Print("NextSet Error set limit reached")
-		return WorkoutSet{}, errors.New("Set limit reached")
+		return WorkoutSet{}, ErrorSetLimitReached
 	}
 
 	row := db.QueryRow(`
@@ -176,9 +191,8 @@ func GetActiveWorkoutSet(workoutId int64, db *sql.DB) (WorkoutSet, error) {
 	var err error
 	workoutSet := WorkoutSet{}
 	if err = row.Scan(&workoutSet.SetNumber, &workoutSet.WorkoutID, &workoutSet.ExerciseID, &workoutSet.StartedAt, &workoutSet.CompletedAt, &workoutSet.SetRating, &workoutSet.WeightTo, &workoutSet.WeightFrom, &workoutSet.RepsFrom, &workoutSet.RepsTo); err != nil {
-		if err != sql.ErrNoRows {
-			log.Printf("GetActiveWorkoutSet Error: %s", err.Error())
-		}
+		log.Printf("GetActiveWorkoutSet Error: %s", err.Error())
+		return WorkoutSet{}, err
 	}
 
 	exercise, err := GetExercise(workoutSet.ExerciseID, db)

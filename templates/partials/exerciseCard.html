@@ -1,8 +1,6 @@
 {{ define "exerciseCard" }}
   <button
     hx-post="/htmx/exercise"
-    hx-swap="innerHTML"
-    hx-target="#container"
     hx-trigger="click"
     name="exercise"
     value="{{ .ID }}"

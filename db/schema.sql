@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS "exercises" (
    [SplitID] INTEGER REFERENCES [splits]([ID]),
    [Name] TEXT NOT NULL,
    [Description] TEXT NOT NULL,
+   [ImageID] INTEGER NOT NULL REFERENCES [images]([ID]),
    [WeightFrom] FLOAT NOT NULL DEFAULT 0,
    [WeightTo] FLOAT NOT NULL DEFAULT 0,
    [RepsFrom] INTEGER NOT NULL DEFAULT 0,
@@ -37,4 +38,9 @@ CREATE TABLE IF NOT EXISTS "workout_sets" (
    [RepsFrom] INTEGER NOT NULL DEFAULT 0,
    [RepsTo] INTEGER NOT NULL DEFAULT 0,
    PRIMARY KEY (SetNumber, WorkoutID, ExerciseID)
+);
+CREATE TABLE IF NOT EXISTS "images" (
+   [ID] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+   [Content] BLOB NOT NULL,
+   [ContentType] TEXT NOT NULL 
 );
