@@ -191,7 +191,6 @@ func (s *HttpServer) startSplitHandler(w http.ResponseWriter, r *http.Request) {
 	splitIdString := r.Form.Get("split")
 	splitId, _ := strconv.ParseInt(splitIdString, 10, 64)
 
-	// Create a new workout
 	workout, _ := dto.NewWorkout(splitId, TEST_USER_ID, s.DB)
 	log.Print(workout)
 
@@ -258,9 +257,12 @@ func NewServer() (*http.Server, error) {
 	handler.Handle("/public/", http.StripPrefix("/public/", fs))
 
 	handler.HandleFunc("/", server.homeHandler)
+	handler.HandleFunc("/user", server.userHandler)
 	handler.HandleFunc("/exercise/image/", server.handleExerciseImage)
 	handler.HandleFunc("/htmx/next", server.nextExerciseHandler)
 	handler.HandleFunc("/htmx/exercise", server.startExerciseHandler)
+	handler.HandleFunc("/htmx/exercise/edit", server.editExercise)
+	handler.HandleFunc("/htmx/exercise/edit/save", server.saveExercise)
 	handler.HandleFunc("/htmx/split", server.startSplitHandler)
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
 

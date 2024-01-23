@@ -2,14 +2,15 @@
 <html lang="en">
   {{ template "head" . }}
   <body class="bg-zinc-800">
-    <main class="h-dvh p-6">
+    <main class="h-dvh p-6 grid place-items-center">
       <div id="container" hx-swap-oob="true">
-        {{ template "pageTitle" .PageTitle }}
         {{ if .Exercise }}
           {{ template "exercise" .Exercise }}
         {{ else if .Exercises }}
+          {{ template "pageTitle" .PageTitle }}
           {{ template "exerciseCards" .Exercises }}
         {{ else if .Splits }}
+          {{ template "pageTitle" .PageTitle }}
           {{ template "splitCards" .Splits }}
         {{ end }}
       </div>
