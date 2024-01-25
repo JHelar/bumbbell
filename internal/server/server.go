@@ -5,12 +5,12 @@ import (
 	"dumbbell/internal/db"
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
+	"dumbbell/internal/mux"
 	"dumbbell/internal/templates"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -220,12 +220,11 @@ func getSplitCards(db *sql.DB) []model.CardViewModel {
 }
 
 func (s *HttpServer) handleExerciseImage(w http.ResponseWriter, r *http.Request) {
-	urlParts := strings.Split(r.URL.Path, "/")
-	exerciseIdString := urlParts[len(urlParts)-1]
+	exerciseIdString := r.FormValue("id")
 	exerciseId, err := strconv.ParseInt(exerciseIdString, 10, 64)
 
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("Error parse exercise id url: %s", r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -251,20 +250,24 @@ func NewServer() (*http.Server, error) {
 		DB: db,
 	}
 
-	handler := http.NewServeMux()
+	handler := mux.NewHttpMux()
 
 	fs := http.FileServer(http.Dir("./public"))
 	handler.Handle("/public/", http.StripPrefix("/public/", fs))
 
-	handler.HandleFunc("/", server.homeHandler)
 	handler.HandleFunc("/user", server.userHandler)
-	handler.HandleFunc("/exercise/image/", server.handleExerciseImage)
+	handler.HandleFunc("/exercise/image/(?P<id>[\\d]+)", server.handleExerciseImage)
 	handler.HandleFunc("/htmx/next", server.nextExerciseHandler)
-	handler.HandleFunc("/htmx/exercise", server.startExerciseHandler)
-	handler.HandleFunc("/htmx/exercise/edit", server.editExercise)
-	handler.HandleFunc("/htmx/exercise/edit/save", server.saveExercise)
+	handler.HandleFunc("/htmx/exercise/start", server.startExerciseHandler)
+
+	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/new", server.newExercise)
+	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/edit", server.editExercise)
+	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/save", server.saveExercise)
+	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
+
 	handler.HandleFunc("/htmx/split", server.startSplitHandler)
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
+	handler.HandleFunc("/", server.homeHandler)
 
 	return &http.Server{
 		Addr:    ":8080",

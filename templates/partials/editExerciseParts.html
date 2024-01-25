@@ -5,6 +5,7 @@
     tabindex="-1"
     aria-labelledby="edit-exercise-drawer-label"
     aria-hidden="true"
+    hx-swap-oob="true"
   >
     {{ template "editExerciseFormContent" }}
   </form>
@@ -12,20 +13,24 @@
 
 {{ define "editExerciseOpen" }}
   <form
-    hx-post="/htmx/exercise/edit/save"
-    hx-swap="outerHTML"
-    hx-select="#edit-exercise-drawer"
     id="edit-exercise-drawer"
+    hx-encoding="multipart/form-data"
+    hx-post="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/save"
+    hx-swap-oob="true"
     class="fixed top-0 left-0 z-40 w-full h-screen max-w-3xl p-4 overflow-y-auto transition-transform bg-white dark:bg-gray-800"
     tabindex="-1"
     aria-labelledby="edit-exercise-drawer-label"
     aria-hidden="false"
   >
-    {{ template "editExerciseFormContent" }}
+    {{ template "editExerciseFormContent" . }}
   </form>
 {{ end }}
 
 {{ define "editExerciseFormContent" }}
+  <div
+    class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 -z-10"
+    hx-on:click="this.parentElement.classList.add('-translate-x-full')"
+  ></div>
   <h5
     id="drawer-label"
     class="inline-flex items-center mb-6 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -34,7 +39,7 @@
   </h5>
   <button
     type="button"
-    data-drawer-dismiss="drawer-update-product"
+    hx-on:click="this.parentElement.classList.add('-translate-x-full')"
     aria-controls="drawer-update-product"
     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
   >
@@ -59,14 +64,14 @@
         <label
           for="name"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Exercise name</label
+          >Name</label
         >
         <input
           type="text"
           name="name"
           id="name"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="Millitary press"
+          value="{{ .Name }}"
           placeholder="Type exercise name"
           required=""
         />
@@ -82,7 +87,7 @@
           name="description"
           id="description"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="Stuff and things"
+          value="{{ .Description }}"
           placeholder="Type exercise description"
           required=""
         />
@@ -90,13 +95,15 @@
       <div class="mb-4">
         <span
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Exercise image</span
+          >Image</span
         >
-        <div
-          class="relative p-2 bg-gray-100 rounded-lg aspect-square dark:bg-gray-700"
-        >
-          <img src="/exercise/image/1" alt="Millitary press" />
-        </div>
+        {{ if .ImageSrc }}
+          <div
+            class="relative p-2 bg-gray-100 rounded-lg aspect-square dark:bg-gray-700"
+          >
+            <img src="{{ .ImageSrc }}" alt="Exercise Image" />
+          </div>
+        {{ end }}
         <div class="flex items-center justify-center w-full mt-2">
           <label
             for="dropzone-file"
@@ -126,7 +133,7 @@
                 SVG, PNG, JPG or GIF (MAX. 800x400px)
               </p>
             </div>
-            <input id="dropzone-file" type="file" class="hidden" />
+            <input id="dropzone-file" type="file" name="image" class="hidden" />
           </label>
         </div>
       </div>
@@ -143,7 +150,7 @@
           name="weight-from"
           id="weight-from"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="12"
+          value="{{ .WeightFrom }}"
           placeholder="Ex. 12"
           required=""
         />
@@ -159,7 +166,7 @@
           name="weight-to"
           id="weight-to"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="12"
+          value="{{ .WeightTo }}"
           placeholder="Ex. 12"
           required=""
         />
@@ -175,7 +182,7 @@
           name="reps-from"
           id="reps-from"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="12"
+          value="{{ .RepsFrom }}"
           placeholder="Ex. 12"
           required=""
         />
@@ -191,8 +198,8 @@
           name="reps-to"
           id="reps-to"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="12"
-          placeholder="Ex. 12"
+          value="{{ .RepsTo }}"
+          placeholder="Ex. 20"
           required=""
         />
       </div>
@@ -207,8 +214,8 @@
           name="sets"
           id="sets"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="12"
-          placeholder="Ex. 12"
+          value="{{ .Sets }}"
+          placeholder="Ex. 3"
           required=""
         />
       </div>
@@ -222,6 +229,10 @@
       Save
     </button>
     <button
+      hx-delete="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/delete"
+      hx-trigger="click"
+      hx-target="#split-{{ .SplitID }}-exercise-row-{{ .ID }}"
+      hx-confirm="Are you sure you wish to delete the exercise?"
       type="button"
       class="text-rose-600 inline-flex justify-center items-center hover:text-white border border-rose-600 hover:bg-rose-600 focus:ring-4 focus:outline-none focus:ring-rose-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-rose-500 dark:text-rose-500 dark:hover:text-white dark:hover:bg-rose-600 dark:focus:ring-rose-900"
     >
@@ -241,4 +252,105 @@
       Delete
     </button>
   </div>
+{{ end }}
+
+{{ define "editExerciseTableRow" }}
+  <tr
+    class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+    id="split-{{ .SplitID }}-exercise-row-{{ .ID }}"
+    hx-swap-oob="true"
+  >
+    <th
+      scope="row"
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      <div class="flex items-center mr-3">
+        <img
+          src="{{ .ImageSrc }}"
+          alt="Exercise Image"
+          class="h-8 w-auto mr-3 rounded"
+        />
+        {{ .Name }}
+      </div>
+    </th>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      {{ .WeightFrom }}
+    </td>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      {{ .WeightTo }}
+    </td>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      {{ .RepsFrom }}
+    </td>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      {{ .RepsTo }}
+    </td>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      {{ .Sets }}
+    </td>
+    <td
+      class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    >
+      <div class="flex items-center space-x-4">
+        <button
+          hx-trigger="click"
+          hx-get="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/edit"
+          hx-swap="none"
+          type="button"
+          class="py-2 px-3 flex items-center text-sm font-medium text-center text-white bg-emerald-600 rounded-lg hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-200 dark:bg-emerald-600 dark:hover:bg-emerald-800 dark:focus:ring-emerald-800"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-2 -ml-0.5"
+            viewbox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Edit
+        </button>
+        <button
+          type="button"
+          hx-delete="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/delete"
+          hx-trigger="click"
+          hx-target="#split-{{ .SplitID }}-exercise-row-{{ .ID }}"
+          hx-confirm="Are you sure you wish to delete the exercise?"
+          class="flex items-center text-rose-600 hover:text-white border border-rose-600 hover:bg-rose-800 focus:ring-4 focus:outline-none focus:ring-rose-200 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-rose-600 dark:text-rose-600 dark:hover:text-white dark:hover:bg-rose-600 dark:focus:ring-rose-900"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-2 -ml-0.5"
+            viewbox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Delete
+        </button>
+      </div>
+    </td>
+  </tr>
 {{ end }}
