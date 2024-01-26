@@ -1,6 +1,6 @@
 {{ define "exerciseCard" }}
   <button
-    hx-post="/htmx/exercise"
+    hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/start"
     hx-trigger="click"
     name="exercise"
     value="{{ .ID }}"

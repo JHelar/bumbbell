@@ -7,28 +7,70 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
-func mustParseInt64(valueString string) int64 {
-	value, err := strconv.ParseInt(valueString, 10, 64)
+func (s *HttpServer) editSplit(w http.ResponseWriter, r *http.Request) {
+	splitId := mustParseInt64(r.FormValue("splitId"))
+
+	split, err := dto.GetSplit(TEST_USER_ID, splitId, s.DB)
 	if err != nil {
-		log.Fatalf("mustParseInt64 Error: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	return value
+
+	w.Header().Add("HX-Reswap", "beforeend")
+	w.Header().Add("HX-Retarget", "main")
+	templates.ExecuteHtmxTemplate(w, "editSplit.html", model.EditSplitModel{
+		ID:          split.ID,
+		Name:        split.Name,
+		Description: split.Description,
+	})
 }
 
-func mustParseFloat64(valueString string) float64 {
-	value, err := strconv.ParseFloat(valueString, 64)
+func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
+	splitId := mustParseInt64(r.FormValue("splitId"))
+
+	name := r.FormValue("name")
+	description := r.FormValue("description")
+
+	split, err := dto.UpdateSplit(TEST_USER_ID, splitId, name, description, s.DB)
 	if err != nil {
-		log.Fatalf("mustParseFloat64 Error: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	return value
+
+	template, err := templates.New("SaveSplitResponse").Parse(`
+	<h3 hx-swap-oob="innerHTML:#split-{{ .ID }} h3">{{ .Name }}</h3>
+	<p hx-swap-oob="innerHTML:#split-{{ .ID }} h3+p">{{ .Description }}</p>
+	`)
+	if err != nil {
+		log.Printf("Error in save split template: %s", err.Error())
+	}
+	template.Execute(w, struct {
+		ID          int64
+		Name        string
+		Description string
+	}{ID: split.ID, Name: split.Name, Description: split.Description})
+}
+
+func (s *HttpServer) deleteSplit(w http.ResponseWriter, r *http.Request) {
+	splitId := mustParseInt64(r.FormValue("splitId"))
+
+	if err := dto.DeleteSplit(TEST_USER_ID, splitId, s.DB); err != nil {
+		log.Printf("Delete split error: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *HttpServer) newExercise(w http.ResponseWriter, r *http.Request) {
 	splitId := mustParseInt64(r.FormValue("splitId"))
+
+	w.Header().Add("HX-Reswap", "beforeend")
+	w.Header().Add("HX-Retarget", "main")
 	templates.ExecuteHtmxTemplate(w, "editExercise.html", model.EditExerciseModel{
 		SplitID: splitId,
 	})
@@ -135,6 +177,8 @@ func (s *HttpServer) editExercise(w http.ResponseWriter, r *http.Request) {
 		log.Printf("editExercise GetExercise error: %s", err.Error())
 	}
 
+	w.Header().Add("HX-Reswap", "beforeend")
+	w.Header().Add("HX-Retarget", "main")
 	templates.ExecuteHtmxTemplate(w, "editExercise.html", model.EditExerciseModel{
 		ID:          exercise.ID,
 		SplitID:     exercise.SplitID,

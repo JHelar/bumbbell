@@ -6,7 +6,6 @@ import (
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/mux"
-	"dumbbell/internal/templates"
 	"fmt"
 	"log"
 	"net/http"
@@ -49,117 +48,6 @@ func makeHMREndpoint() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		log.Fatal(err.Error())
-	}
-
-	rating := r.Form.Get("rating")
-
-	workout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	newSet, err := dto.CreateNextSet(workout.ID, dto.SetStatus(rating), s.DB)
-	if err != nil {
-		if err == dto.ErrorSetLimitReached {
-			cards := getExerciseCards(workout.SplitID, workout.ID, s.DB)
-			if len(cards) > 0 {
-				templates.ExecuteHtmxTemplate(w, "pickExercise.html", map[string]interface{}{
-					"PageTitle": "Pick an Exercise",
-					"Cards":     cards,
-				})
-				return
-			}
-
-			if err = dto.CompleteWorkout(workout.ID, s.DB); err != nil {
-				log.Print("Unable to complete workout!")
-				return
-			}
-			cards = getSplitCards(s.DB)
-			templates.ExecuteHtmxTemplate(w, "pickSplit.html", map[string]interface{}{
-				"PageTitle": "Start a workout",
-				"Cards":     cards,
-			})
-			return
-		}
-		log.Printf(err.Error())
-		http.Redirect(w, r, "/", http.StatusTeapot)
-		return
-	}
-
-	completedSets, err := dto.GetCompletedWorkoutSets(workout.ID, newSet.ExerciseID, s.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	sets := []dto.SetStatus{}
-	for _, completedSet := range completedSets {
-		sets = append(sets, completedSet.SetRating)
-	}
-	sets = append(sets, newSet.SetRating)
-
-	remaining := int(newSet.Sets) - len(sets)
-	for i := 0; i < remaining; i++ {
-		sets = append(sets, dto.SetUncompleted)
-	}
-
-	templates.ExecuteHtmxTemplate(w, "nextExercise.html", sets)
-}
-
-func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		log.Fatal(err.Error())
-	}
-
-	exerciseIdString := r.Form.Get("exercise")
-	exerciseId, _ := strconv.ParseInt(exerciseIdString, 10, 64)
-
-	exercise, err := dto.GetExercise(exerciseId, s.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	workout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	_, err = dto.CreateNewSet(workout.ID, exerciseId, s.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	sets := []dto.SetStatus{
-		dto.SetCurrent,
-	}
-	for i := 1; i < int(exercise.Sets); i++ {
-		sets = append(sets, dto.SetUncompleted)
-	}
-
-	templates.ExecuteHtmxTemplate(w, "startExercise.html", model.ExerciseViewModel{
-		Name:        exercise.Name,
-		Description: exercise.Description,
-		ImageSrc:    exercise.GetImageURL(),
-		WeightFrom:  exercise.WeightFrom,
-		WeightTo:    exercise.WeightTo,
-		RepsFrom:    exercise.RepsFrom,
-		RepsTo:      exercise.RepsTo,
-		Sets:        sets,
-	})
-}
-
 func getExerciseCards(splitId int64, workoutId int64, db *sql.DB) []model.CardViewModel {
 	exercises, err := dto.GetAvailableExercises(splitId, workoutId, db)
 	if err != nil {
@@ -169,36 +57,14 @@ func getExerciseCards(splitId int64, workoutId int64, db *sql.DB) []model.CardVi
 	cards := []model.CardViewModel{}
 	for _, exercise := range exercises {
 		cards = append(cards, model.CardViewModel{
-			ID:          fmt.Sprint(exercise.ID),
+			ID:          exercise.ID,
+			WorkoutID:   workoutId,
 			Name:        exercise.Name,
 			Description: exercise.Description,
 		})
 	}
 
 	return cards
-}
-
-func (s *HttpServer) startSplitHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		log.Fatal(err.Error())
-	}
-
-	splitIdString := r.Form.Get("split")
-	splitId, _ := strconv.ParseInt(splitIdString, 10, 64)
-
-	workout, _ := dto.NewWorkout(splitId, TEST_USER_ID, s.DB)
-	log.Print(workout)
-
-	cards := getExerciseCards(splitId, workout.ID, s.DB)
-	templates.ExecuteHtmxTemplate(w, "pickExercise.html", map[string]interface{}{
-		"PageTitle": "Pick an exercise",
-		"Cards":     cards,
-	})
 }
 
 func getSplitCards(db *sql.DB) []model.CardViewModel {
@@ -210,7 +76,7 @@ func getSplitCards(db *sql.DB) []model.CardViewModel {
 	cards := []model.CardViewModel{}
 	for _, split := range splits {
 		cards = append(cards, model.CardViewModel{
-			ID:          fmt.Sprint(split.ID),
+			ID:          split.ID,
 			Name:        split.Name,
 			Description: split.Description,
 		})
@@ -257,15 +123,20 @@ func NewServer() (*http.Server, error) {
 
 	handler.HandleFunc("/user", server.userHandler)
 	handler.HandleFunc("/exercise/image/(?P<id>[\\d]+)", server.handleExerciseImage)
-	handler.HandleFunc("/htmx/next", server.nextExerciseHandler)
-	handler.HandleFunc("/htmx/exercise/start", server.startExerciseHandler)
+
+	handler.PostFunc("/htmx/workout/start", server.startWorkoutHandler)
+	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/start", server.startExerciseHandler)
+	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/next", server.nextExerciseHandler)
+
+	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/edit", server.editSplit)
+	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/save", server.saveSplit)
+	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/delete", server.deleteSplit)
 
 	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/new", server.newExercise)
 	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/edit", server.editExercise)
 	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/save", server.saveExercise)
 	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
 
-	handler.HandleFunc("/htmx/split", server.startSplitHandler)
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
 	handler.HandleFunc("/", server.homeHandler)
 

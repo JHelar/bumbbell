@@ -6,3 +6,14 @@
 #container {
     @apply overflow-y-clip;
 }
+
+#edit-exercise-drawer.htmx-swapping,
+#edit-split-drawer.htmx-swapping {
+    @apply -translate-x-full;
+}
+main.htmx-settling {
+    #edit-exercise-drawer,
+    #edit-split-drawer {
+        @apply -translate-x-full;
+    }
+}

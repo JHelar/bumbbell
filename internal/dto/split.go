@@ -32,3 +32,53 @@ func GetSplits(userId int64, db *sql.DB) ([]Split, error) {
 
 	return splits, err
 }
+
+func GetSplit(userId int64, splitId int64, db *sql.DB) (Split, error) {
+	row := db.QueryRow(`
+	SELECT ID, UserID, Name, Description FROM splits WHERE ID=? AND UserID=?
+	`, splitId, userId)
+
+	split := Split{}
+	if err := row.Scan(&split.ID, &split.UserID, &split.Name, &split.Description); err != nil {
+		log.Printf("Error in GetSplit: %s", err.Error())
+		return Split{}, err
+	}
+	return split, nil
+}
+
+func UpdateSplit(userId int64, splitId int64, name string, description string, db *sql.DB) (Split, error) {
+	row := db.QueryRow(`
+	UPDATE splits 
+	SET Name=?,
+		Description=?
+	WHERE ID=? AND UserID=?
+	RETURNING ID, UserID, Name, Description
+	`, name, description, splitId, userId)
+
+	split := Split{}
+	if err := row.Scan(&split.ID, &split.UserID, &split.Name, &split.Description); err != nil {
+		log.Printf("Error in Update split: %s", err.Error())
+		return Split{}, err
+	}
+	return split, nil
+}
+
+func DeleteSplit(userId int64, splitId int64, db *sql.DB) error {
+	deleteSplitResult, err := db.Exec(`
+	DELETE FROM splits
+	WHERE ID=? AND UserID=?
+	`, splitId, userId)
+
+	if err != nil {
+		log.Printf("Error in DeleteSplit: %s", err.Error())
+		return err
+	}
+
+	rows, err := deleteSplitResult.RowsAffected()
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return err
+}

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "exercises" (
    [SplitID] INTEGER REFERENCES [splits]([ID]) ON DELETE CASCADE,
    [Name] TEXT NOT NULL,
    [Description] TEXT NOT NULL,
-   [ImageID] INTEGER NOT NULL REFERENCES [images]([ID]),
+   [ImageID] INTEGER DEFAULT 0 REFERENCES [images]([ID]) ON DELETE SET DEFAULT,
    [WeightFrom] FLOAT NOT NULL DEFAULT 0,
    [WeightTo] FLOAT NOT NULL DEFAULT 0,
    [RepsFrom] INTEGER NOT NULL DEFAULT 0,
@@ -44,8 +44,9 @@ CREATE TABLE IF NOT EXISTS "images" (
    [Content] BLOB NOT NULL,
    [ContentType] TEXT NOT NULL 
 );
-
-
+CREATE TRIGGER on_exercise_delete AFTER DELETE ON exercises BEGIN
+  DELETE FROM images WHERE ID = old.ImageID;
+END;
 
 
 

@@ -36,7 +36,7 @@
     hx-swap-oob="true"
   >
     <button
-      hx-post="/htmx/next"
+      hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/next"
       hx-trigger="click"
       hx-swap="none"
       name="rating"
@@ -60,7 +60,7 @@
       </svg>
     </button>
     <button
-      hx-post="/htmx/next"
+      hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/next"
       hx-trigger="click"
       hx-swap="none"
       name="rating"

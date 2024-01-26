@@ -156,21 +156,16 @@ func CreateExercise(
 func DeleteExercise(exerciseId int64, db *sql.DB) error {
 	var err error
 
-	result := db.QueryRow(`
+	result, err := db.Exec(`
 	DELETE FROM exercises
 		WHERE ID=?
-		RETURNING ImageID
 	`, exerciseId)
 
-	var imageId int64
-	if err = result.Scan(&imageId); err != nil {
-		return err
-	}
+	rows, err := result.RowsAffected()
 
-	_, err = db.Exec(`
-	DELETE FROM images
-		WHERE ID=?
-	`, imageId)
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
 
 	return err
 }

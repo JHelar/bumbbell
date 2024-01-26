@@ -38,6 +38,7 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 				"Title": "Dumbell",
 				"Exercise": model.ExerciseViewModel{
 					Name:        exercise.Name,
+					WorkoutID:   activeWorkout.ID,
 					Description: exercise.Description,
 					ImageSrc:    exercise.GetImageURL(),
 					WeightFrom:  exercise.WeightFrom,
@@ -52,11 +53,14 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 		cards := getExerciseCards(activeWorkout.SplitID, activeWorkout.ID, s.DB)
 		if len(cards) > 0 {
-			templates.ExecutePageTemplate(w, "index.html", map[string]interface{}{
+			err := templates.ExecutePageTemplate(w, "index.html", map[string]interface{}{
 				"Title":     "Dumbell",
 				"PageTitle": "Pick an exercise",
 				"Exercises": cards,
 			})
+			if err != nil {
+				log.Printf("Error: in here %s", err.Error())
+			}
 			return
 		}
 	} else {

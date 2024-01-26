@@ -6,6 +6,7 @@ import (
 
 type ExerciseViewModel struct {
 	Name        string
+	WorkoutID   int64
 	Description string
 	ImageSrc    string
 	WeightFrom  float64
@@ -16,7 +17,8 @@ type ExerciseViewModel struct {
 }
 
 type CardViewModel struct {
-	ID          string
+	ID          int64
+	WorkoutID   int64
 	Name        string
 	Description string
 }
@@ -58,4 +60,10 @@ type EditExerciseModel struct {
 	RepsTo      float64
 	ImageSrc    string
 	Sets        int64
+}
+
+type EditSplitModel struct {
+	ID          int64
+	Name        string
+	Description string
 }

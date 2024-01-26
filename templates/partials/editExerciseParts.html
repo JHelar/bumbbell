@@ -1,35 +1,51 @@
-{{ define "editExerciseClosed" }}
-  <form
-    id="edit-exercise-drawer"
-    class="fixed top-0 left-0 z-40 w-full h-screen max-w-3xl p-4 overflow-y-auto transition-transform -translate-x-full bg-white dark:bg-gray-800"
-    tabindex="-1"
-    aria-labelledby="edit-exercise-drawer-label"
-    aria-hidden="true"
-    hx-swap-oob="true"
-  >
-    {{ template "editExerciseFormContent" }}
-  </form>
-{{ end }}
-
 {{ define "editExerciseOpen" }}
   <form
     id="edit-exercise-drawer"
     hx-encoding="multipart/form-data"
     hx-post="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/save"
-    hx-swap-oob="true"
+    hx-on-htmx-config-request="
+      if(Boolean(event.target.imageFile)) {
+        event.detail.parameters.image = [event.target.imageFile];
+      }
+    "
+    hx-swap="delete swap:150ms"
     class="fixed top-0 left-0 z-40 w-full h-screen max-w-3xl p-4 overflow-y-auto transition-transform bg-white dark:bg-gray-800"
     tabindex="-1"
     aria-labelledby="edit-exercise-drawer-label"
     aria-hidden="false"
+    hx-ext="debug"
   >
     {{ template "editExerciseFormContent" . }}
+    <script type="application/javascript">
+      function displayImagePreview(file) {
+        if (!file || !file.type.startsWith("image/")) {
+          return;
+        }
+
+        document.querySelector("#edit-exercise-drawer").imageFile = file;
+
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = function () {
+          const image = document.querySelector("#image-preview");
+          image.src = this.result;
+          image.parentElement.classList.remove("hidden");
+        };
+      }
+    </script>
   </form>
 {{ end }}
 
 {{ define "editExerciseFormContent" }}
   <div
     class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 -z-10"
-    hx-on:click="this.parentElement.classList.add('-translate-x-full')"
+    hx-on:click="
+      const formElement = htmx.closest(this, 'form');
+      htmx.addClass(formElement, '-translate-x-full');
+      setTimeout(() => {
+        htmx.remove(formElement);
+      }, 150);
+    "
   ></div>
   <h5
     id="drawer-label"
@@ -39,7 +55,13 @@
   </h5>
   <button
     type="button"
-    hx-on:click="this.parentElement.classList.add('-translate-x-full')"
+    hx-on:click="
+      const formElement = htmx.closest(this, 'form');
+      htmx.addClass(formElement, '-translate-x-full');
+      setTimeout(() => {
+        htmx.remove(formElement);
+      }, 150);
+    "
     aria-controls="drawer-update-product"
     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
   >
@@ -97,19 +119,34 @@
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >Image</span
         >
-        {{ if .ImageSrc }}
-          <div
-            class="relative p-2 bg-gray-100 rounded-lg aspect-square dark:bg-gray-700"
-          >
-            <img src="{{ .ImageSrc }}" alt="Exercise Image" />
-          </div>
-        {{ end }}
+        <div
+          class="{{ if not .ImageSrc }}
+            hidden
+          {{ end }}relative p-2 bg-gray-100 rounded-lg aspect-square dark:bg-gray-700"
+        >
+          <img id="image-preview" src="{{ .ImageSrc }}" alt="Exercise Image" />
+        </div>
         <div class="flex items-center justify-center w-full mt-2">
           <label
             for="dropzone-file"
             class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+            hx-on:dragenter="event.stopPropagation(); event.preventDefault();this.classList.add('brightness-50', 'dark:brightness-150');"
+            hx-on:dragleave="event.stopPropagation(); event.preventDefault();this.classList.remove('brightness-50', 'dark:brightness-150');"
+            hx-on:dragover="event.stopPropagation(); event.preventDefault();"
+            hx-on:drop="
+              event.stopPropagation(); 
+              event.preventDefault();
+              const files = event.dataTransfer.files;
+
+              if(files.length > 0) {
+                const file = files[0];
+                displayImagePreview(file);
+              }
+            "
           >
-            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <div
+              class="pointer-events-none flex flex-col items-center justify-center pt-5 pb-6"
+            >
               <svg
                 aria-hidden="true"
                 class="w-10 h-10 mb-3 text-gray-400"
@@ -133,7 +170,16 @@
                 SVG, PNG, JPG or GIF (MAX. 800x400px)
               </p>
             </div>
-            <input id="dropzone-file" type="file" name="image" class="hidden" />
+            <input
+              id="dropzone-file"
+              type="file"
+              name="image"
+              class="hidden"
+              hx-on:input="
+                const file = this.files[0];
+                displayImagePreview(file);
+              "
+            />
           </label>
         </div>
       </div>
@@ -150,7 +196,7 @@
           name="weight-from"
           id="weight-from"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="{{ .WeightFrom }}"
+          {{ if .WeightFrom }}value="{{ .WeightFrom }}"{{ end }}
           placeholder="Ex. 12"
           required=""
         />
@@ -166,7 +212,7 @@
           name="weight-to"
           id="weight-to"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="{{ .WeightTo }}"
+          {{ if .WeightTo }}value="{{ .WeightTo }}"{{ end }}
           placeholder="Ex. 12"
           required=""
         />
@@ -175,14 +221,14 @@
         <label
           for="reps-from"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Reps from (kg)</label
+          >Reps from</label
         >
         <input
           type="number"
           name="reps-from"
           id="reps-from"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="{{ .RepsFrom }}"
+          {{ if .RepsFrom }}value="{{ .RepsFrom }}"{{ end }}
           placeholder="Ex. 12"
           required=""
         />
@@ -191,14 +237,14 @@
         <label
           for="reps-to"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Reps to (kg)</label
+          >Reps to</label
         >
         <input
           type="number"
           name="reps-to"
           id="reps-to"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="{{ .RepsTo }}"
+          {{ if .RepsTo }}value="{{ .RepsTo }}"{{ end }}
           placeholder="Ex. 20"
           required=""
         />
@@ -214,7 +260,7 @@
           name="sets"
           id="sets"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-600 focus:border-emerald-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
-          value="{{ .Sets }}"
+          {{ if .Sets }}value="{{ .Sets }}"{{ end }}
           placeholder="Ex. 3"
           required=""
         />
@@ -256,7 +302,7 @@
 
 {{ define "editExerciseTableRow" }}
   <tr
-    class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+    class="border-b last:border-b-0 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
     id="split-{{ .SplitID }}-exercise-row-{{ .ID }}"
     hx-swap-oob="true"
   >
@@ -337,7 +383,7 @@
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 mr-2 -ml-0.5"
+            class="h-4 w-4 -mr-0.5 -ml-0.5"
             viewbox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -348,7 +394,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          Delete
+          <span class="sr-only">Delete</span>
         </button>
       </div>
     </td>

@@ -66,6 +66,20 @@ func GetActiveWorkout(userId int64, db *sql.DB) (Workout, error) {
 	return workout, err
 }
 
+func GetWorkout(userId int64, workoutId int64, db *sql.DB) (Workout, error) {
+	row := db.QueryRow("SELECT ID, UserID, SplitID, StartedAt, CompletedAt FROM workouts WHERE ID=? AND UserID=?", workoutId, userId)
+
+	var err error
+	workout := Workout{}
+	if err = row.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
+		if err != sql.ErrNoRows {
+			log.Printf("GetActiveWorkout Error: %s", err.Error())
+		}
+	}
+
+	return workout, err
+}
+
 func CompleteWorkout(workoutId int64, db *sql.DB) error {
 	result, err := db.Exec(`
 	UPDATE workouts

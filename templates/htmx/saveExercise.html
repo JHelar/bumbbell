@@ -1,11 +1,9 @@
 {{ if .IsNew }}
   <table hx-swap-oob="beforeend:#split-{{ .SplitID }}-exercise-rows">
-    <tbody id="insertion-tbody">
+    <tbody>
       {{ template "editExerciseTableRow" . }}
     </tbody>
   </table>
-  {{ template "editExerciseClosed" . }}
 {{ else }}
   {{ template "editExerciseTableRow" . }}
-  {{ template "editExerciseClosed" . }}
 {{ end }}
