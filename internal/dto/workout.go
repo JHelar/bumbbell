@@ -52,6 +52,31 @@ func NewWorkout(splitId int64, userId int64, db *sql.DB) (Workout, error) {
 	return workout, err
 }
 
+func DeleteWorkout(userId int64, workoutId int64, db *sql.DB) error {
+	result, err := db.Exec(`
+	DELETE FROM workouts
+	WHERE ID=? AND UserID=?
+	`, workoutId, userId)
+
+	if err != nil {
+		log.Printf("Error deleting workout: %s", err.Error())
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Error deleting workout: %s", err.Error())
+		return err
+	}
+
+	if rows == 0 {
+		log.Printf("Delete workout, no rows to delete: %s", err.Error())
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
 func GetActiveWorkout(userId int64, db *sql.DB) (Workout, error) {
 	row := db.QueryRow("SELECT ID, UserID, SplitID, StartedAt, CompletedAt FROM workouts WHERE UserID=? AND CompletedAt IS NULL", userId)
 

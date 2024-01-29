@@ -117,3 +117,21 @@ func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request)
 
 	templates.ExecuteHtmxTemplate(w, "nextExercise.html", sets)
 }
+
+func (s *HttpServer) abortWorkout(w http.ResponseWriter, r *http.Request) {
+	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
+	if err != nil {
+		log.Printf("Error getting active workout: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = dto.DeleteWorkout(TEST_USER_ID, activeWorkout.ID, s.DB)
+	if err != nil {
+		log.Printf("Error getting active workout: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}

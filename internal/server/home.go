@@ -62,6 +62,9 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 				log.Printf("Error: in here %s", err.Error())
 			}
 			return
+		} else {
+			log.Print("Delete workout")
+			dto.DeleteWorkout(TEST_USER_ID, activeWorkout.ID, s.DB)
 		}
 	} else {
 		log.Print("No active workout")

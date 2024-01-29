@@ -124,7 +124,10 @@ func NewServer() (*http.Server, error) {
 	handler.HandleFunc("/user", server.userHandler)
 	handler.HandleFunc("/exercise/image/(?P<id>[\\d]+)", server.handleExerciseImage)
 
+	handler.HandleFunc("/workouts", server.workoutsHandler)
+
 	handler.PostFunc("/htmx/workout/start", server.startWorkoutHandler)
+	handler.DeleteFunc("/htmx/workout/abort", server.abortWorkout)
 	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/start", server.startExerciseHandler)
 	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/next", server.nextExerciseHandler)
 
