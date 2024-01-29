@@ -1,5 +1,7 @@
 {{ define "exerciseCards" }}
-  <div class="flex gap-4 container p-6 mx-auto">
+  <div
+    class="flex flex-wrap gap-4 container w-full p-6 mx-auto place-self-start justify-center"
+  >
     {{ range . }}
       {{ template "exerciseCard" . }}
     {{ end }}

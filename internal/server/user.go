@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+func (s *HttpServer) newSplit(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("HX-Reswap", "beforeend")
+	w.Header().Add("HX-Retarget", "main")
+	templates.ExecuteHtmxTemplate(w, "editSplit.html", model.EditSplitModel{})
+}
+
 func (s *HttpServer) editSplit(w http.ResponseWriter, r *http.Request) {
 	splitId := mustParseInt64(r.FormValue("splitId"))
 
@@ -34,24 +40,47 @@ func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	description := r.FormValue("description")
 
-	split, err := dto.UpdateSplit(TEST_USER_ID, splitId, name, description, s.DB)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	if splitId == 0 {
+		split, err := dto.CreateSplit(TEST_USER_ID, name, description, s.DB)
 
-	template, err := templates.New("SaveSplitResponse").Parse(`
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = templates.ExecuteHtmxTemplate(w, "newSplit.html", model.EditWorkoutTableSplitModel{
+			ID:          split.ID,
+			Name:        split.Name,
+			Description: split.Description,
+			Exercises:   []model.EditExerciseTableRowModel{},
+		})
+
+		if err != nil {
+			log.Printf("Error in save split template: %s", err.Error())
+		}
+
+	} else {
+		split, err := dto.UpdateSplit(TEST_USER_ID, splitId, name, description, s.DB)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		template, err := templates.New("SaveSplitResponse").Parse(`
 	<h3 hx-swap-oob="innerHTML:#split-{{ .ID }} h3">{{ .Name }}</h3>
 	<p hx-swap-oob="innerHTML:#split-{{ .ID }} h3+p">{{ .Description }}</p>
 	`)
-	if err != nil {
-		log.Printf("Error in save split template: %s", err.Error())
+		if err != nil {
+			log.Printf("Error in save split template: %s", err.Error())
+		}
+		template.Execute(w, struct {
+			ID          int64
+			Name        string
+			Description string
+		}{ID: split.ID, Name: split.Name, Description: split.Description})
+
 	}
-	template.Execute(w, struct {
-		ID          int64
-		Name        string
-		Description string
-	}{ID: split.ID, Name: split.Name, Description: split.Description})
 }
 
 func (s *HttpServer) deleteSplit(w http.ResponseWriter, r *http.Request) {

@@ -46,6 +46,21 @@ func GetSplit(userId int64, splitId int64, db *sql.DB) (Split, error) {
 	return split, nil
 }
 
+func CreateSplit(userId int64, name string, description string, db *sql.DB) (Split, error) {
+	row := db.QueryRow(`
+	INSERT INTO splits (UserID, Name, Description)
+	VALUES (?, ?, ?)
+	RETURNING ID, UserID, Name, Description
+	`, userId, name, description)
+
+	split := Split{}
+	if err := row.Scan(&split.ID, &split.UserID, &split.Name, &split.Description); err != nil {
+		log.Printf("Error in CreateSplit: %s", err.Error())
+		return Split{}, err
+	}
+	return split, nil
+}
+
 func UpdateSplit(userId int64, splitId int64, name string, description string, db *sql.DB) (Split, error) {
 	row := db.QueryRow(`
 	UPDATE splits 

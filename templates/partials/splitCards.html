@@ -1,5 +1,7 @@
 {{ define "splitCards" }}
-  <div class="flex flex-wrap gap-4 container w-full p-6 mx-auto">
+  <div
+    class="flex flex-wrap gap-4 container w-full p-6 mx-auto place-self-start justify-center"
+  >
     {{ range . }}
       {{ template "splitCard" . }}
     {{ end }}

@@ -1,0 +1,14 @@
+{{ define "formBackdrop" }}
+  <div
+    class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 transition-opacity form-backdrop"
+    hx-on:click="
+    const formElement = this.previousElementSibling;
+    htmx.addClass(formElement, '-translate-x-full');
+    htmx.addClass(this, 'opacity-0');
+    setTimeout(() => {
+      htmx.remove(formElement);
+      htmx.remove(this);
+    }, 150);
+  "
+  ></div>
+{{ end }}

@@ -128,6 +128,7 @@ func NewServer() (*http.Server, error) {
 	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/start", server.startExerciseHandler)
 	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/next", server.nextExerciseHandler)
 
+	handler.GetFunc("/htmx/split/new", server.newSplit)
 	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/edit", server.editSplit)
 	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/save", server.saveSplit)
 	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/delete", server.deleteSplit)

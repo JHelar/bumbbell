@@ -34,19 +34,10 @@
       }
     </script>
   </form>
+  {{ template "formBackdrop" }}
 {{ end }}
 
 {{ define "editExerciseFormContent" }}
-  <div
-    class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 -z-10"
-    hx-on:click="
-      const formElement = htmx.closest(this, 'form');
-      htmx.addClass(formElement, '-translate-x-full');
-      setTimeout(() => {
-        htmx.remove(formElement);
-      }, 150);
-    "
-  ></div>
   <h5
     id="drawer-label"
     class="inline-flex items-center mb-6 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -347,7 +338,7 @@
     <td
       class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
     >
-      <div class="flex items-center space-x-4">
+      <div class="flex justify-end items-center space-x-4">
         <button
           hx-trigger="click"
           hx-get="/htmx/split/{{ .SplitID }}/exercise/{{ .ID }}/edit"
