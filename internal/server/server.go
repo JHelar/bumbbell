@@ -124,7 +124,7 @@ func NewServer() (*http.Server, error) {
 	handler.HandleFunc("/user", server.userHandler)
 	handler.HandleFunc("/exercise/image/(?P<id>[\\d]+)", server.handleExerciseImage)
 
-	handler.HandleFunc("/workouts", server.workoutsHandler)
+	handler.HandleFunc("/workout", server.workoutPageHandler)
 
 	handler.PostFunc("/htmx/workout/start", server.startWorkoutHandler)
 	handler.DeleteFunc("/htmx/workout/abort", server.abortWorkout)
@@ -142,7 +142,7 @@ func NewServer() (*http.Server, error) {
 	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
 
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
-	handler.HandleFunc("/", server.homeHandler)
+	handler.HandleFunc("/", server.dashboardHandler)
 
 	return &http.Server{
 		Addr:    ":8080",

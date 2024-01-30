@@ -68,9 +68,10 @@ func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		template, err := templates.New("SaveSplitResponse").Parse(`
-	<h3 hx-swap-oob="innerHTML:#split-{{ .ID }} h3">{{ .Name }}</h3>
-	<p hx-swap-oob="innerHTML:#split-{{ .ID }} h3+p">{{ .Description }}</p>
-	`)
+		<h3 hx-swap-oob="innerHTML:#split-{{ .ID }} h3">{{ .Name }}</h3>
+		<p hx-swap-oob="innerHTML:#split-{{ .ID }} h3+p">{{ .Description }}</p>
+		`)
+
 		if err != nil {
 			log.Printf("Error in save split template: %s", err.Error())
 		}
@@ -79,7 +80,6 @@ func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
 			Name        string
 			Description string
 		}{ID: split.ID, Name: split.Name, Description: split.Description})
-
 	}
 }
 

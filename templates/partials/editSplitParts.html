@@ -4,12 +4,14 @@
     hx-encoding="multipart/form-data"
     hx-post="/htmx/split/{{ .ID }}/save"
     hx-swap="delete swap:150ms"
-    class="fixed top-0 left-0 z-40 w-full h-screen max-w-xl overflow-y-auto"
+    class="fixed top-0 left-0 z-40 w-full h-screen max-w-xl"
     tabindex="-1"
     aria-labelledby="edit-split-drawer-label"
     aria-hidden="false"
   >
-    <div class="bg-white dark:bg-gray-800 p-4 h-screen transition-transform">
+    <div
+      class="bg-white dark:bg-gray-800 p-4 h-screen transition-transform overflow-y-auto"
+    >
       <h5
         id="drawer-label"
         class="inline-flex items-center mb-6 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -66,9 +68,11 @@
           hx-on-htmx-after-request="
         if(!event.detail.failed) {
             const formElement = htmx.closest(this, 'form');
-            htmx.addClass(formElement, '-translate-x-full');
+            const formContentElement = htmx.closest(this, 'form > div:first-child');
+            htmx.addClass(formContentElement, '-translate-x-full');
+            htmx.addClass(this, 'opacity-0');
             setTimeout(() => {
-            htmx.remove(formElement);
+              htmx.remove(formElement);
             }, 150);
         }
         "

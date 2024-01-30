@@ -1,0 +1,170 @@
+{{ define "workoutActivityChart" }}
+  <div
+    class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
+  >
+    <div
+      class="flex justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-700"
+    >
+      <div class="flex items-center">
+        <div>
+          <h2
+            class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-1"
+          >
+            10
+          </h2>
+          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
+            Workouts per month
+          </p>
+        </div>
+      </div>
+      <div>
+        <span
+          class="bg-emerald-100 text-emerald-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded-md dark:bg-emerald-900 dark:text-emerald-300"
+        >
+          <svg
+            class="w-2.5 h-2.5 me-1.5"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 10 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13V1m0 0L1 5m4-4 4 4"
+            />
+          </svg>
+          5%
+        </span>
+      </div>
+    </div>
+
+    <div id="column-chart"></div>
+  </div>
+
+  <script>
+    window.addEventListener("load", function () {
+      const options = {
+        colors: ["#1A56DB", "#FDBA8C"],
+        series: [
+          {
+            name: "This year",
+            color: "#1A56DB",
+            data: [
+              { x: "Jan", y: 231 },
+              { x: "Feb", y: 122 },
+              { x: "Mar", y: 63 },
+              { x: "Apr", y: 421 },
+              { x: "Jul", y: 122 },
+              { x: "July", y: 323 },
+              { x: "Oct", y: 111 },
+              { x: "Nov", y: 111 },
+              { x: "Dec", y: 111 },
+            ],
+          },
+          {
+            name: "Last year",
+            color: "#FDBA8C",
+            data: [
+              { x: "Jan", y: 123 },
+              { x: "Feb", y: 221 },
+              { x: "Mar", y: 36 },
+              { x: "Apr", y: 124 },
+              { x: "Jul", y: 221 },
+              { x: "July", y: 414 },
+              { x: "Oct", y: 231 },
+              { x: "Nov", y: 444 },
+              { x: "Dec", y: 123 },
+            ],
+          },
+        ],
+        chart: {
+          type: "bar",
+          height: "320px",
+          fontFamily: "Inter, sans-serif",
+          toolbar: {
+            show: false,
+          },
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: "70%",
+            borderRadiusApplication: "end",
+            borderRadius: 8,
+          },
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          style: {
+            fontFamily: "Inter, sans-serif",
+          },
+        },
+        states: {
+          hover: {
+            filter: {
+              type: "darken",
+              value: 1,
+            },
+          },
+        },
+        stroke: {
+          show: true,
+          width: 0,
+          colors: ["transparent"],
+        },
+        grid: {
+          show: false,
+          strokeDashArray: 4,
+          padding: {
+            left: 2,
+            right: 2,
+            top: -14,
+          },
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        legend: {
+          show: false,
+        },
+        xaxis: {
+          floating: false,
+          labels: {
+            show: true,
+            style: {
+              fontFamily: "Inter, sans-serif",
+              cssClass: "text-xs font-normal fill-gray-500 dark:fill-gray-400",
+            },
+          },
+          axisBorder: {
+            show: false,
+          },
+          axisTicks: {
+            show: false,
+          },
+        },
+        yaxis: {
+          show: false,
+        },
+        fill: {
+          opacity: 1,
+        },
+      };
+
+      if (
+        document.getElementById("column-chart") &&
+        typeof ApexCharts !== "undefined"
+      ) {
+        const chart = new ApexCharts(
+          document.getElementById("column-chart"),
+          options,
+        );
+        chart.render();
+      }
+    });
+  </script>
+{{ end }}
