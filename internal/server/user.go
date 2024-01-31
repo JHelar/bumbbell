@@ -4,6 +4,7 @@ import (
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/templates"
+	"dumbbell/internal/utils"
 	"io"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ func (s *HttpServer) newSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) editSplit(w http.ResponseWriter, r *http.Request) {
-	splitId := mustParseInt64(r.FormValue("splitId"))
+	splitId := utils.MustParseInt64(r.FormValue("splitId"))
 
 	split, err := dto.GetSplit(TEST_USER_ID, splitId, s.DB)
 	if err != nil {
@@ -35,7 +36,7 @@ func (s *HttpServer) editSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
-	splitId := mustParseInt64(r.FormValue("splitId"))
+	splitId := utils.MustParseInt64(r.FormValue("splitId"))
 
 	name := r.FormValue("name")
 	description := r.FormValue("description")
@@ -84,7 +85,7 @@ func (s *HttpServer) saveSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) deleteSplit(w http.ResponseWriter, r *http.Request) {
-	splitId := mustParseInt64(r.FormValue("splitId"))
+	splitId := utils.MustParseInt64(r.FormValue("splitId"))
 
 	if err := dto.DeleteSplit(TEST_USER_ID, splitId, s.DB); err != nil {
 		log.Printf("Delete split error: %s", err.Error())
@@ -96,7 +97,7 @@ func (s *HttpServer) deleteSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) newExercise(w http.ResponseWriter, r *http.Request) {
-	splitId := mustParseInt64(r.FormValue("splitId"))
+	splitId := utils.MustParseInt64(r.FormValue("splitId"))
 
 	w.Header().Add("HX-Reswap", "beforeend")
 	w.Header().Add("HX-Retarget", "main")
@@ -106,7 +107,7 @@ func (s *HttpServer) newExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) deleteExercise(w http.ResponseWriter, r *http.Request) {
-	id := mustParseInt64(r.FormValue("id"))
+	id := utils.MustParseInt64(r.FormValue("id"))
 	if err := dto.DeleteExercise(id, s.DB); err != nil {
 		log.Printf("deleteExercise delete error: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -124,17 +125,17 @@ func (s *HttpServer) saveExercise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := mustParseInt64(r.FormValue("id"))
-	splitId := mustParseInt64(r.FormValue("splitId"))
+	id := utils.MustParseInt64(r.FormValue("id"))
+	splitId := utils.MustParseInt64(r.FormValue("splitId"))
 
 	name := r.FormValue("name")
 	description := r.FormValue("description")
 
-	weightFrom := mustParseFloat64(r.FormValue("weight-from"))
-	weightTo := mustParseFloat64(r.FormValue("weight-to"))
-	repsFrom := mustParseInt64(r.FormValue("reps-from"))
-	repsTo := mustParseInt64(r.FormValue("reps-to"))
-	sets := mustParseInt64(r.FormValue("sets"))
+	weightFrom := utils.MustParseFloat64(r.FormValue("weight-from"))
+	weightTo := utils.MustParseFloat64(r.FormValue("weight-to"))
+	repsFrom := utils.MustParseInt64(r.FormValue("reps-from"))
+	repsTo := utils.MustParseInt64(r.FormValue("reps-to"))
+	sets := utils.MustParseInt64(r.FormValue("sets"))
 
 	if err != nil {
 		log.Printf("Error reading image file content: %s", err.Error())
@@ -199,7 +200,7 @@ func (s *HttpServer) editExercise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exerciseId := mustParseInt64(r.FormValue("id"))
+	exerciseId := utils.MustParseInt64(r.FormValue("id"))
 
 	exercise, err := dto.GetExercise(exerciseId, s.DB)
 	if err != nil {

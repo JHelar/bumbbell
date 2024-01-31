@@ -6,6 +6,7 @@ import (
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/mux"
+	"dumbbell/internal/service"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,7 +17,8 @@ import (
 )
 
 type HttpServer struct {
-	DB *sql.DB
+	DB             *sql.DB
+	WorkoutService service.WorkoutService
 }
 
 var upgrader = websocket.Upgrader{}
@@ -113,7 +115,8 @@ func NewServer() (*http.Server, error) {
 		return nil, err
 	}
 	server := &HttpServer{
-		DB: db,
+		DB:             db,
+		WorkoutService: service.NewWorkoutService(db),
 	}
 
 	handler := mux.NewHttpMux()
@@ -142,7 +145,7 @@ func NewServer() (*http.Server, error) {
 	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
 
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
-	handler.HandleFunc("/", server.dashboardHandler)
+	handler.HandleFunc("/", server.homeHandler)
 
 	return &http.Server{
 		Addr:    ":8080",

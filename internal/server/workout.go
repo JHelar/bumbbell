@@ -4,6 +4,7 @@ import (
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/templates"
+	"dumbbell/internal/utils"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,8 +25,8 @@ func (s *HttpServer) startWorkoutHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request) {
-	workoutId := mustParseInt64(r.FormValue("workoutId"))
-	exerciseId := mustParseInt64(r.FormValue("exercise"))
+	workoutId := utils.MustParseInt64(r.FormValue("workoutId"))
+	exerciseId := utils.MustParseInt64(r.FormValue("exercise"))
 
 	exercise, err := dto.GetExercise(exerciseId, s.DB)
 	if err != nil {
@@ -63,7 +64,7 @@ func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request) {
-	workoutId := mustParseInt64(r.FormValue("workoutId"))
+	workoutId := utils.MustParseInt64(r.FormValue("workoutId"))
 	rating := r.FormValue("rating")
 
 	workout, err := dto.GetWorkout(TEST_USER_ID, workoutId, s.DB)

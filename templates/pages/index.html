@@ -13,19 +13,30 @@
             <h1
               class="leading-none text-gray-900 dark:text-white text-3xl md:text-5xl font-extrabold mb-2"
             >
-              Active split name
+              {{ if .HasActiveWorkout }}
+                {{ .ActiveWorkout.Name }}
+              {{ else }}
+                No active workout
+              {{ end }}
             </h1>
             <p
               class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-6"
             >
-              Information about the current workout if there is an active one,
-              otherwise nothing?
+              {{ if .HasActiveWorkout }}
+                {{ .ActiveWorkout.Description }}
+              {{ else }}
+                Time to get started!
+              {{ end }}
             </p>
             <a
               href="/workout"
               class="inline-flex justify-center items-center py-2.5 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900"
             >
-              Continue workout
+              {{ if .HasActiveWorkout }}
+                Continue workout
+              {{ else }}
+                Start workout
+              {{ end }}
               <svg
                 class="w-3.5 h-3.5 ms-2 rtl:rotate-180"
                 aria-hidden="true"
@@ -43,110 +54,108 @@
               </svg>
             </a>
           </div>
-          {{ template "activeWorkoutChart" . }}
+          {{ if .HasActiveWorkout }}
+            {{ template "activeWorkoutChart" .ActiveWorkout }}
+          {{ end }}
         </div>
         <div class="grid md:grid-cols-2 gap-8">
-          {{ template "workoutActivityChart" . }}
+          {{ template "workoutActivityChart" .WorkoutActivity }}
           <div
             class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
           >
-            <div
-              class="flex justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-700"
-            >
-              <div class="flex items-center">
-                <div>
-                  <h2
-                    class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-1"
-                  >
-                    Workout sets
-                  </h2>
-                  <p
-                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
-                  >
-                    Latest
-                  </p>
+            {{ if .LatestWorkoutSets }}
+              <div
+                class="flex justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-700"
+              >
+                <div class="flex items-center">
+                  <div>
+                    <h2
+                      class="leading-none text-2xl font-bold text-gray-900 dark:text-white pb-1"
+                    >
+                      Workout sets
+                    </h2>
+                    <p
+                      class="text-sm font-normal text-gray-500 dark:text-gray-400"
+                    >
+                      Latest
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <span
-                  class="bg-emerald-100 text-emerald-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded-md dark:bg-emerald-900 dark:text-emerald-300"
-                >
-                  <svg
-                    class="w-4 h-4 me-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 12h14m-7 7V5"
-                    />
-                  </svg>
-                  1 New
-                </span>
-              </div>
-            </div>
-            <div class="h-[320px] overflow-y-auto">
-              <ul class="list-none m-0 p-0 flex flex-col">
-                <li
-                  class="flex flex-nowrap gap-x-2 justify-between items-center py-2"
-                >
-                  <h3
-                    class="leading-none text-base text-gray-900 dark:text-white"
-                  >
-                    <span class="font-bold me-2">Exercise</span
-                    ><small
-                      class="text-xs font-normal text-gray-500 dark:text-gray-400"
-                      >Split</small
+                {{ if .LatestWorkoutSets.HasNewSet }}
+                  <div>
+                    <span
+                      class="bg-emerald-100 text-emerald-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded-md dark:bg-emerald-900 dark:text-emerald-300"
                     >
-                  </h3>
-                  <svg
-                    class="w-5 h-5 text-emerald-400"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M15 9.7h4a2 2 0 0 1 1.6.9 2 2 0 0 1 .3 1.8l-2.4 7.2c-.3.9-.5 1.4-1.9 1.4-2 0-4.2-.7-6.1-1.3L9 19.3V9.5A32 32 0 0 0 13.2 4c.1-.4.5-.7.9-.9h1.2c.4.1.7.4 1 .7l.2 1.3L15 9.7ZM4.2 10H7v8a2 2 0 1 1-4 0v-6.8c0-.7.5-1.2 1.2-1.2Z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </li>
-                <li
-                  class="flex flex-nowrap gap-x-2 justify-between items-center py-2"
-                >
-                  <h3
-                    class="leading-none text-base text-gray-900 dark:text-white"
-                  >
-                    <span class="font-bold me-2">Exercise</span
-                    ><small
-                      class="text-xs font-normal text-gray-500 dark:text-gray-400"
-                      >Split</small
+                      <svg
+                        class="w-4 h-4 me-1.5"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 12h14m-7 7V5"
+                        />
+                      </svg>
+                      1 New
+                    </span>
+                  </div>
+                {{ end }}
+              </div>
+              <div class="h-[320px] overflow-y-auto">
+                <ul class="list-none m-0 p-0 flex flex-col">
+                  {{ range .LatestWorkoutSets.Sets }}
+                    <li
+                      class="flex flex-nowrap gap-x-2 justify-between items-center py-2"
                     >
-                  </h3>
-                  <svg
-                    class="h-5 w-5 text-rose-400"
-                    style="rotate: y 180deg"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M9 14.3H5a2 2 0 0 1-1.6-.9 2 2 0 0 1-.3-1.8l2.4-7.2C5.8 3.5 6 3 7.4 3c2 0 4.2.7 6.1 1.3l1.4.4v9.8a32 32 0 0 0-4.2 5.5c-.1.4-.5.7-.9.9a1.7 1.7 0 0 1-2.1-.7c-.2-.4-.3-.8-.3-1.3L9 14.3Zm10.8-.3H17V6a2 2 0 1 1 4 0v6.8c0 .7-.5 1.2-1.2 1.2Z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </li>
-              </ul>
-            </div>
+                      <h3
+                        class="leading-none text-base text-gray-900 dark:text-white"
+                      >
+                        <span class="font-bold me-2">{{ .ExerciseName }}</span
+                        ><small
+                          class="text-xs font-normal text-gray-500 dark:text-gray-400"
+                          >{{ .SplitName }}</small
+                        >
+                      </h3>
+                      {{ if eq .Status "good" }}
+                        <svg
+                          class="w-5 h-5 text-emerald-400"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M15 9.7h4a2 2 0 0 1 1.6.9 2 2 0 0 1 .3 1.8l-2.4 7.2c-.3.9-.5 1.4-1.9 1.4-2 0-4.2-.7-6.1-1.3L9 19.3V9.5A32 32 0 0 0 13.2 4c.1-.4.5-.7.9-.9h1.2c.4.1.7.4 1 .7l.2 1.3L15 9.7ZM4.2 10H7v8a2 2 0 1 1-4 0v-6.8c0-.7.5-1.2 1.2-1.2Z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      {{ else if eq .Status "bad" }}
+                        <svg
+                          class="h-5 w-5 text-rose-400"
+                          style="rotate: y 180deg"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M9 14.3H5a2 2 0 0 1-1.6-.9 2 2 0 0 1-.3-1.8l2.4-7.2C5.8 3.5 6 3 7.4 3c2 0 4.2.7 6.1 1.3l1.4.4v9.8a32 32 0 0 0-4.2 5.5c-.1.4-.5.7-.9.9a1.7 1.7 0 0 1-2.1-.7c-.2-.4-.3-.8-.3-1.3L9 14.3Zm10.8-.3H17V6a2 2 0 1 1 4 0v6.8c0 .7-.5 1.2-1.2 1.2Z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      {{ end }}
+                    </li>
+                  {{ end }}
+                </ul>
+              </div>
+            {{ end }}
           </div>
         </div>
       </section>
@@ -154,19 +163,10 @@
         <div
           class="flex flex-col max-h-full h-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 overflow-hidden"
         >
-          <h2
-            class="text-gray-900 dark:text-white text-3xl md:text-5xl font-extrabold mb-2"
-          >
-            Splits
-          </h2>
-          <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-6">
-            Latest workout split name here
-          </p>
           <div class="overflow-y-auto flex-1" style="contain: size;">
-            {{ template "workoutSplitChart" 1 }}
-            {{ template "workoutSplitChart" 2 }}
-            {{ template "workoutSplitChart" 3 }}
-            {{ template "workoutSplitChart" 4 }}
+            {{ range .WorkoutSplits }}
+              {{ template "workoutSplitChart" . }}
+            {{ end }}
           </div>
         </div>
       </section>

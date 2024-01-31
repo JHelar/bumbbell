@@ -3,96 +3,33 @@
     <h5
       class="text-xl font-bold leading-none text-gray-900 dark:text-white mb-3"
     >
-      Split name
+      {{ .SplitName }}
     </h5>
-    <div class="flex max-w-full flex-wrap gap-1" id="devices">
-      <div class="flex items-center me-4">
-        <input
-          id="shrugs"
-          type="checkbox"
-          value="shrugs"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="shrugs"
-          class="ms-2 text-sm whitespace-nowrap font-medium text-gray-900 dark:text-gray-300"
-          >Shrugs</label
-        >
-      </div>
-      <div class="flex items-center me-4">
-        <input
-          id="mp"
-          type="checkbox"
-          value="mp"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="mp"
-          class="ms-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Millitary press</label
-        >
-      </div>
-      <div class="flex items-center me-4">
-        <input
-          id="arnold-press"
-          type="checkbox"
-          value="arnold-press"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="arnold-press"
-          class="ms-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Arnold press</label
-        >
-      </div>
-      <div class="flex items-center me-4">
-        <input
-          id="arnold-press"
-          type="checkbox"
-          value="arnold-press"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="arnold-press"
-          class="ms-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Exercise 4</label
-        >
-      </div>
-      <div class="flex items-center me-4">
-        <input
-          id="arnold-press"
-          type="checkbox"
-          value="arnold-press"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="arnold-press"
-          class="ms-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Exercise 5</label
-        >
-      </div>
-      <div class="flex items-center me-4">
-        <input
-          id="arnold-press"
-          type="checkbox"
-          value="arnold-press"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label
-          for="arnold-press"
-          class="ms-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Exercise 6</label
-        >
-      </div>
+    <div class="flex max-w-full flex-wrap gap-1" id="exercises-{{ .ID }}">
+      {{ range .Exercises }}
+        <div class="flex items-center me-4">
+          <input
+            id="exercise-{{ .ID }}"
+            type="checkbox"
+            value="{{ .ID }}"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          />
+          <label
+            for="exercise-{{ .ID }}"
+            class="ms-2 text-sm whitespace-nowrap font-medium text-gray-900 dark:text-gray-300"
+            >{{ .ExerciseName }}</label
+          >
+        </div>
+      {{ end }}
     </div>
     <!-- Donut Chart -->
-    <div class="py-6" id="donut-chart-{{ . }}"></div>
+    <div class="py-6" id="donut-chart-{{ .ID }}"></div>
 
     <script>
       window.addEventListener("load", function () {
         const getChartOptions = () => {
           return {
-            series: [10, 5],
+            series: [{{ .TotalGoodRatings }}, {{ .TotalBadRatings }}],
             colors: ["#34d399", "#fb7185"],
             chart: {
               height: 320,
@@ -160,7 +97,12 @@
           };
         };
 
-        const chartElement = document.getElementById("donut-chart-{{ . }}")
+        const chartElement = document.getElementById("donut-chart-{{ .ID }}")
+        const chartData = {
+          {{ range .Exercises }}
+            "{{ .ID }}": [{{ .GoodRatings }}, {{ .BadRatings }}],
+            {{ end }}
+        }
         if (
           chartElement &&
           typeof ApexCharts !== "undefined"
@@ -170,6 +112,20 @@
             getChartOptions(),
           );
           chart.render();
+
+          const checkboxes = document.querySelectorAll('#exercises-{{ .ID }} input[type="checkbox"]');
+          checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', (event) => handleCheckboxChange(event, chart));
+          });
+
+          function handleCheckboxChange(event, chart) {
+            const checkedValues = Array.from(document.querySelectorAll('#exercises-{{ .ID }} input[type="checkbox"]:checked').values()).map(input => input.value)
+            if(checkedValues.length === 0) {
+              chart.updateSeries([{{ .TotalGoodRatings }}, {{ .TotalBadRatings }}])
+            } else {
+              chart.updateSeries(checkedValues.reduce(([totalGood, totalBad], value) => [totalGood + chartData[value][0], totalBad + chartData[value][1]], [0, 0]))
+            }
+          }
         }
       });
     </script>

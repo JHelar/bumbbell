@@ -98,11 +98,61 @@ func GetWorkout(userId int64, workoutId int64, db *sql.DB) (Workout, error) {
 	workout := Workout{}
 	if err = row.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
 		if err != sql.ErrNoRows {
-			log.Printf("GetActiveWorkout Error: %s", err.Error())
+			log.Printf("GetWorkout Error: %s", err.Error())
 		}
 	}
 
 	return workout, err
+}
+
+func GetAllCompletedWorkouts(userId int64, db *sql.DB) ([]Workout, error) {
+	rows, err := db.Query(`
+	SELECT ID, UserID, SplitID, StartedAt, CompletedAt FROM workouts
+	WHERE UserID=? AND CompletedAt IS NOT NULL
+	ORDER BY StartedAt
+	`, userId)
+
+	if err != nil {
+		log.Printf("GetAllCompletedWorkouts error: %s", err.Error())
+		return nil, err
+	}
+
+	workouts := []Workout{}
+	for rows.Next() {
+		workout := Workout{}
+		if err = rows.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
+			break
+		}
+
+		workouts = append(workouts, workout)
+	}
+
+	return workouts, err
+}
+
+func GetAllCompletedWorkoutsForSplit(userId int64, splitId int64, db *sql.DB) ([]Workout, error) {
+	rows, err := db.Query(`
+	SELECT ID, UserID, SplitID, StartedAt, CompletedAt FROM workouts
+	WHERE UserID=? AND SplitID=? AND CompletedAt IS NOT NULL
+	ORDER BY StartedAt
+	`, userId, splitId)
+
+	if err != nil {
+		log.Printf("GetAllCompletedWorkoutsForSplit error: %s", err.Error())
+		return nil, err
+	}
+
+	workouts := []Workout{}
+	for rows.Next() {
+		workout := Workout{}
+		if err = rows.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
+			break
+		}
+
+		workouts = append(workouts, workout)
+	}
+
+	return workouts, err
 }
 
 func CompleteWorkout(workoutId int64, db *sql.DB) error {
@@ -241,6 +291,62 @@ func GetActiveWorkoutSet(workoutId int64, db *sql.DB) (WorkoutSet, error) {
 
 	workoutSet.Sets = exercise.Sets
 	return workoutSet, err
+}
+
+func GetAllWorkoutSets(userId int64, limit int, db *sql.DB) ([]WorkoutSet, error) {
+	rows, err := db.Query(`
+	SELECT SetNumber, WorkoutID, ExerciseID, StartedAt, CompletedAt, SetRating, WeightFrom, WeightTo, RepsFrom, RepsTo 
+	FROM workout_sets 
+	WHERE WorkoutID IN (
+		SELECT ID FROM workouts
+		WHERE UserID=?
+	)
+	ORDER BY CompletedAt DESC NULLS FIRST
+	LIMIT ?
+	`, userId, limit)
+
+	if err != nil {
+		log.Printf("GetAllWorkoutSets error: %s", err.Error())
+		return nil, err
+	}
+
+	workoutSets := []WorkoutSet{}
+	for rows.Next() {
+		workoutSet := WorkoutSet{}
+		if err = rows.Scan(&workoutSet.SetNumber, &workoutSet.WorkoutID, &workoutSet.ExerciseID, &workoutSet.StartedAt, &workoutSet.CompletedAt, &workoutSet.SetRating, &workoutSet.WeightTo, &workoutSet.WeightFrom, &workoutSet.RepsFrom, &workoutSet.RepsTo); err != nil {
+			log.Printf("GetAllWorkoutSets Error: %s", err.Error())
+			break
+		}
+		workoutSets = append(workoutSets, workoutSet)
+	}
+
+	return workoutSets, err
+}
+
+func GetAllWorkoutSetsForExercise(exerciseId int64, db *sql.DB) ([]WorkoutSet, error) {
+	rows, err := db.Query(`
+	SELECT SetNumber, WorkoutID, ExerciseID, StartedAt, CompletedAt, SetRating, WeightFrom, WeightTo, RepsFrom, RepsTo 
+	FROM workout_sets 
+	WHERE ExerciseID=?
+	ORDER BY CompletedAt DESC NULLS FIRST
+	`, exerciseId)
+
+	if err != nil {
+		log.Printf("GetAllWorkoutSets error: %s", err.Error())
+		return nil, err
+	}
+
+	workoutSets := []WorkoutSet{}
+	for rows.Next() {
+		workoutSet := WorkoutSet{}
+		if err = rows.Scan(&workoutSet.SetNumber, &workoutSet.WorkoutID, &workoutSet.ExerciseID, &workoutSet.StartedAt, &workoutSet.CompletedAt, &workoutSet.SetRating, &workoutSet.WeightTo, &workoutSet.WeightFrom, &workoutSet.RepsFrom, &workoutSet.RepsTo); err != nil {
+			log.Printf("GetAllWorkoutSets Error: %s", err.Error())
+			break
+		}
+		workoutSets = append(workoutSets, workoutSet)
+	}
+
+	return workoutSets, err
 }
 
 func UpdateActiveWorkoutSet(workoutId int64, rating SetStatus, db *sql.DB) (WorkoutSet, error) {

@@ -67,3 +67,65 @@ type EditSplitModel struct {
 	Name        string
 	Description string
 }
+
+type DashboardPageModel struct {
+	Title             string
+	HasActiveWorkout  bool
+	ActiveWorkout     ActiveWorkoutModel
+	LatestWorkoutSets LatestWorkoutSetsModel
+	WorkoutActivity   WorkoutActivityModel
+	WorkoutSplits     []WorkoutSplitModel
+}
+
+type ActiveWorkoutModel struct {
+	Name        string
+	Description string
+	Stats       ActiveWorkoutStatsModel
+}
+
+type ActiveWorkoutStatsModel struct {
+	Remaining           int
+	Progress            int
+	Done                int
+	RemainingPercentage int
+	ProgressPercentage  int
+	DonePercentage      int
+}
+
+type LatestWorkoutSetsModel struct {
+	HasNewSet bool
+	Sets      []LatestWorkoutSetModel
+}
+
+type LatestWorkoutSetModel struct {
+	SplitName    string
+	ExerciseName string
+	Status       dto.SetStatus
+}
+
+type WorkoutActivityModel struct {
+	MonthCount int
+	MonthDiff  int
+	Months     []WorkoutActivityMonthModel
+}
+
+type WorkoutActivityMonthModel struct {
+	Month            string
+	ThisYearActivity int
+	LastYearActivity int
+}
+
+type WorkoutSplitModel struct {
+	ID               int64
+	SplitName        string
+	TotalGoodRatings int
+	TotalBadRatings  int
+	Exercises        []WorkoutSplitExerciseModel
+}
+
+type WorkoutSplitExerciseModel struct {
+	ID           int64
+	ExerciseName string
+	GoodRatings  int
+	BadRatings   int
+}
