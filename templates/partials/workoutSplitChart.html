@@ -26,7 +26,7 @@
     <div class="py-6" id="donut-chart-{{ .ID }}"></div>
 
     <script>
-      window.addEventListener("load", function () {
+      htmx.on("htmx:load", function () {
         const getChartOptions = () => {
           return {
             series: [{{ .TotalGoodRatings }}, {{ .TotalBadRatings }}],
@@ -112,6 +112,10 @@
             getChartOptions(),
           );
           chart.render();
+
+          chartElement.addEventListener('htmx:beforeCleanupElement', function () {
+            chart.destroy()
+          })
 
           const checkboxes = document.querySelectorAll('#exercises-{{ .ID }} input[type="checkbox"]');
           checkboxes.forEach((checkbox) => {

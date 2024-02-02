@@ -79,6 +79,7 @@ type DashboardPageModel struct {
 	HasActiveWorkout  bool
 	ActiveWorkout     ActiveWorkoutModel
 	LatestWorkoutSets LatestWorkoutSetsModel
+	Splits            []CardViewModel
 	WorkoutActivity   WorkoutActivityModel
 	WorkoutSplits     []WorkoutSplitModel
 }

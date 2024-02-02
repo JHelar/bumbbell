@@ -70,24 +70,6 @@ func getExerciseCards(splitId int64, workoutId int64, db *sql.DB) []model.CardVi
 	return cards
 }
 
-func getSplitCards(db *sql.DB) []model.CardViewModel {
-	splits, err := dto.GetSplits(TEST_USER_ID, db)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cards := []model.CardViewModel{}
-	for _, split := range splits {
-		cards = append(cards, model.CardViewModel{
-			ID:          split.ID,
-			Name:        split.Name,
-			Description: split.Description,
-		})
-	}
-
-	return cards
-}
-
 func (s *HttpServer) handleExerciseImage(w http.ResponseWriter, r *http.Request) {
 	exerciseIdString := r.FormValue("id")
 	exerciseId, err := strconv.ParseInt(exerciseIdString, 10, 64)

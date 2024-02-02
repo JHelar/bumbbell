@@ -99,7 +99,6 @@ func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request)
 				w.Header().Add("HX-Reselect", "#container")
 				w.Header().Add("HX-Retarget", "#container")
 				w.Header().Add("HX-Reswap", "outerHTML")
-				w.Header().Add("HX-Trigger-After-Swap", "updateCharts")
 
 				templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
 				return
@@ -111,15 +110,10 @@ func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request)
 					return
 				}
 
-				cards := getSplitCards(s.DB)
 				w.Header().Add("HX-Reselect", "#container")
 				w.Header().Add("HX-Retarget", "#container")
 				w.Header().Add("HX-Reswap", "outerHTML")
-				w.Header().Add("HX-Trigger-After-Swap", "updateCharts")
-
-				templates.ExecutePageTemplate(w, "workout.html", map[string]interface{}{
-					"Splits": cards,
-				})
+				http.Redirect(w, r, "/", http.StatusMovedPermanently)
 				return
 			}
 		}
@@ -169,10 +163,10 @@ func (s *HttpServer) abortWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) {
-	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
-	if err == nil {
-		activeWorkoutSet, err := dto.GetActiveWorkoutSet(activeWorkout.ID, s.DB)
-		if err == nil {
+	activeWorkout, activeWorkoutErr := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
+	if activeWorkoutErr == nil {
+		activeWorkoutSet, activeWorkoutSetErr := dto.GetActiveWorkoutSet(activeWorkout.ID, s.DB)
+		if activeWorkoutSetErr == nil {
 			exercise, err := dto.GetExercise(activeWorkoutSet.ExerciseID, s.DB)
 			if err != nil {
 				log.Print("Could not get associated exercise")
@@ -214,22 +208,24 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		pickExerciseData, err := s.WorkoutService.GetPickExerciseModel(TEST_USER_ID, activeWorkout.ID)
-		if err != nil {
-			if err == service.ErrorNoExercises {
+		pickExerciseData, pickExerciseErr := s.WorkoutService.GetPickExerciseModel(TEST_USER_ID, activeWorkout.ID)
+		if pickExerciseErr != nil {
+			if pickExerciseErr == service.ErrorNoExercises {
 				dto.CompleteWorkout(activeWorkout.ID, s.DB)
 				http.Redirect(w, r, "/", http.StatusMovedPermanently)
 				return
 			}
 
-			log.Printf("Error: in here %s", err.Error())
+			log.Printf("Error: in here %s", pickExerciseErr.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		} else {
+			log.Print("No pickExerciseData workoutpagehandler")
 		}
 
-		err = templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
-		if err != nil {
-			log.Printf("Error: in here %s", err.Error())
+		templateErr := templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
+		if templateErr != nil {
+			log.Printf("Error: in here %s", templateErr.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -237,10 +233,6 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 		log.Print("No active workout")
 	}
 
-	cards := getSplitCards(s.DB)
-	templates.ExecutePageTemplate(w, "workout.html", map[string]interface{}{
-		"Title":     "Dumbell",
-		"PageTitle": "Start a workout",
-		"Splits":    cards,
-	})
+	w.Header().Add("HX-Push-Url", "/")
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }

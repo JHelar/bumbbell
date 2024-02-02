@@ -210,6 +210,24 @@ func (s *WorkoutService) GetAvailableExercises(splitId int64, workoutId int64) (
 	return cards, nil
 }
 
+func (s *WorkoutService) GetSplitCards(userId int64) ([]model.CardViewModel, error) {
+	splits, err := dto.GetSplits(userId, s.DB)
+	if err != nil {
+		return nil, err
+	}
+
+	cards := []model.CardViewModel{}
+	for _, split := range splits {
+		cards = append(cards, model.CardViewModel{
+			ID:          split.ID,
+			Name:        split.Name,
+			Description: split.Description,
+		})
+	}
+
+	return cards, nil
+}
+
 func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (model.PickExerciseModel, error) {
 	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
 	if err != nil {

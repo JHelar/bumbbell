@@ -4,6 +4,7 @@
   <body class="bg-white dark:bg-zinc-800 dark">
     <main
       class="grid grid-cols-3 gap-8 py-8 px-4 mx-auto max-w-screen-xl lg:py-16"
+      id="container"
     >
       <section class="md:col-span-2 col-span-full">
         <div
@@ -28,31 +29,36 @@
                 Time to get started!
               {{ end }}
             </p>
-            <a
-              href="/workout"
-              class="inline-flex justify-center items-center py-2.5 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900"
-            >
-              {{ if .HasActiveWorkout }}
-                Continue workout
-              {{ else }}
-                Start workout
-              {{ end }}
-              <svg
-                class="w-3.5 h-3.5 ms-2 rtl:rotate-180"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 14 10"
+            {{ if .HasActiveWorkout }}
+              <a
+                href="/workout"
+                class="inline-flex justify-center items-center py-2.5 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900"
               >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M1 5h12m0 0L9 1m4 4L9 9"
-                />
-              </svg>
-            </a>
+                Continue workout
+
+                <svg
+                  class="w-3.5 h-3.5 ms-2 rtl:rotate-180"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M1 5h12m0 0L9 1m4 4L9 9"
+                  />
+                </svg>
+              </a>
+            {{ else }}
+              <div class="grid grid-flow-col-dense auto-cols-fr gap-4">
+                {{ range .Splits }}
+                  {{ template "splitCard" . }}
+                {{ end }}
+              </div>
+            {{ end }}
           </div>
           {{ if .HasActiveWorkout }}
             {{ template "activeWorkoutChart" .ActiveWorkout }}

@@ -80,13 +80,8 @@ func DeleteWorkout(userId int64, workoutId int64, db *sql.DB) error {
 func GetActiveWorkout(userId int64, db *sql.DB) (Workout, error) {
 	row := db.QueryRow("SELECT ID, UserID, SplitID, StartedAt, CompletedAt FROM workouts WHERE UserID=? AND CompletedAt IS NULL", userId)
 
-	var err error
 	workout := Workout{}
-	if err = row.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt); err != nil {
-		if err != sql.ErrNoRows {
-			log.Printf("GetActiveWorkout Error: %s", err.Error())
-		}
-	}
+	err := row.Scan(&workout.ID, &workout.UserID, &workout.SplitID, &workout.StartedAt, &workout.CompletedAt)
 
 	return workout, err
 }

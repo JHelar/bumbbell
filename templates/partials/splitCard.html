@@ -1,6 +1,7 @@
 {{ define "splitCard" }}
   <button
     hx-post="/htmx/workout/start"
+    hx-push-url="/workout"
     name="split"
     value="{{ .ID }}"
     class="text-left block min-w-fit p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
