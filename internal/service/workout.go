@@ -5,6 +5,7 @@ import (
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/utils"
+	"errors"
 	"time"
 )
 
@@ -23,6 +24,8 @@ var MONTH_NAMES = []string{
 	"Dec",
 }
 
+var ErrorNoExercises = errors.New("No exercises available")
+
 type WorkoutService struct {
 	DB *sql.DB
 }
@@ -31,18 +34,18 @@ func NewWorkoutService(db *sql.DB) WorkoutService {
 	return WorkoutService{DB: db}
 }
 
-func (s *WorkoutService) GetActiveWorkout(userId int64) (model.ActiveWorkoutModel, error) {
-	activeWorkout, err := dto.GetActiveWorkout(userId, s.DB)
+func (s *WorkoutService) GetActiveWorkoutData(userId int64, workoutId int64) (model.ActiveWorkoutModel, error) {
+	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
 
 	if err != nil {
 		return model.ActiveWorkoutModel{}, err
 	}
 
-	split, _ := dto.GetSplit(userId, activeWorkout.SplitID, s.DB)
+	split, _ := dto.GetSplit(userId, workout.SplitID, s.DB)
 
-	allExercises, _ := dto.GetAllExercises(activeWorkout.SplitID, s.DB)
-	availableExercises, _ := dto.GetAvailableExercises(activeWorkout.SplitID, activeWorkout.ID, s.DB)
-	activeWorkoutSet, _ := dto.GetActiveWorkoutSet(activeWorkout.ID, s.DB)
+	allExercises, _ := dto.GetAllExercises(workout.SplitID, s.DB)
+	availableExercises, _ := dto.GetAvailableExercises(workout.SplitID, workout.ID, s.DB)
+	activeWorkoutSet, _ := dto.GetActiveWorkoutSet(workout.ID, s.DB)
 
 	all := len(allExercises)
 
@@ -113,7 +116,7 @@ func (s *WorkoutService) GetWorkoutActivity(userId int64) (model.WorkoutActivity
 	lastYear := thisYear - 1
 
 	for _, workout := range workouts {
-		month := workout.StartedAt.Month()
+		month := workout.StartedAt.Month() - 1
 		year := workout.StartedAt.Year()
 
 		if year >= lastYear {
@@ -185,4 +188,57 @@ func (s *WorkoutService) GetWorkoutSplits(userId int64) ([]model.WorkoutSplitMod
 	}
 
 	return splitModels, nil
+}
+
+func (s *WorkoutService) GetAvailableExercises(splitId int64, workoutId int64) ([]model.CardViewModel, error) {
+	exercises, err := dto.GetAvailableExercises(splitId, workoutId, s.DB)
+	if err != nil {
+		return nil, err
+	}
+
+	cards := []model.CardViewModel{}
+	for _, exercise := range exercises {
+		cards = append(cards, model.CardViewModel{
+			ID:          exercise.ID,
+			Name:        exercise.Name,
+			Description: exercise.Description,
+			WorkoutID:   workoutId,
+			ImageSrc:    exercise.GetImageURL(),
+		})
+	}
+
+	return cards, nil
+}
+
+func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (model.PickExerciseModel, error) {
+	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
+	if err != nil {
+		return model.PickExerciseModel{}, err
+	}
+
+	exercises, err := s.GetAvailableExercises(workout.SplitID, workout.ID)
+	if err != nil {
+		return model.PickExerciseModel{}, err
+	}
+	if len(exercises) == 0 {
+		return model.PickExerciseModel{}, ErrorNoExercises
+	}
+
+	activeWorkoutData, err := s.GetActiveWorkoutData(userId, workoutId)
+	if err != nil {
+		return model.PickExerciseModel{}, err
+	}
+
+	workoutStartString := workout.StartedAt.Format("15:04 2006-01-02")
+	workoutDuration := time.Now().Sub(workout.StartedAt)
+	workoutDurationString := utils.FmtDuration(workoutDuration)
+	startedAt := workout.StartedAt.UnixMilli()
+	return model.PickExerciseModel{
+		Title:             "Dumbell",
+		Exercises:         exercises,
+		ActiveWorkout:     activeWorkoutData,
+		WorkoutStart:      workoutStartString,
+		WorkoutDuration:   workoutDurationString,
+		WorkoutStartMilli: startedAt,
+	}, nil
 }

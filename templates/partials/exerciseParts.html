@@ -1,6 +1,10 @@
 {{ define "exerciseSets" }}
-  <ol class="flex items-center mb-4" id="exercise-sets" hx-swap-oob="true">
-    {{ range $index, $element := . }}
+  <ol
+    class="flex items-center mb-4"
+    id="exercise-sets"
+    {{ if .Htmx }}hx-swap-oob="true"{{ end }}
+  >
+    {{ range $index, $element := .Items }}
       <li class="relative w-full">
         <div class="flex items-center">
           {{ if eq $element "good" }}
@@ -20,7 +24,7 @@
               class="z-10 flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full ring-0 ring-white dark:bg-gray-700 sm:ring-8 dark:ring-gray-900 shrink-0"
             ></div>
           {{ end }}
-          {{ if isNotLast $index $ }}
+          {{ if isNotLast $index $.Items }}
             <div class="flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"></div>
           {{ end }}
         </div>
@@ -33,7 +37,7 @@
   <div
     class="flex text-sm font-medium text-center text-gray-500 divide-x rounded-lg rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 dark:text-gray-400"
     id="exercise-buttons"
-    hx-swap-oob="true"
+    {{ if .Sets.Htmx }}hx-swap-oob="true"{{ end }}
   >
     <button
       hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/next"

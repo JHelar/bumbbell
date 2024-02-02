@@ -13,12 +13,18 @@ type ExerciseViewModel struct {
 	WeightTo    float64
 	RepsFrom    float64
 	RepsTo      float64
-	Sets        []dto.SetStatus
+	Sets        ExerciseSetsModel
+}
+
+type ExerciseSetsModel struct {
+	Items []dto.SetStatus
+	Htmx  bool
 }
 
 type CardViewModel struct {
 	ID          int64
 	WorkoutID   int64
+	ImageSrc    string
 	Name        string
 	Description string
 }
@@ -128,4 +134,13 @@ type WorkoutSplitExerciseModel struct {
 	ExerciseName string
 	GoodRatings  int
 	BadRatings   int
+}
+
+type PickExerciseModel struct {
+	Title             string
+	Exercises         []CardViewModel
+	ActiveWorkout     ActiveWorkoutModel
+	WorkoutStart      string
+	WorkoutDuration   string
+	WorkoutStartMilli int64
 }

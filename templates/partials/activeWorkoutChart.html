@@ -44,8 +44,13 @@
   </div>
 
   <script>
-    // ApexCharts options and config
-    window.addEventListener("load", function () {
+    var chart;
+    function initChart() {
+      const chartElement = document.getElementById("radial-chart");
+      if (!chartElement) {
+        return;
+      }
+
       const getChartOptions = () => {
         return {
           series: [{{ .Stats.DonePercentage }}, {{ .Stats.ProgressPercentage }}, {{ .Stats.RemainingPercentage }}],
@@ -106,15 +111,25 @@
       };
 
       if (
-        document.getElementById("radial-chart") &&
         typeof ApexCharts !== "undefined"
       ) {
-        var chart = new ApexCharts(
-          document.querySelector("#radial-chart"),
+        if(chart) {
+          chart.updateOptions(getChartOptions(), true, true);
+          return
+        }
+
+        chart = new ApexCharts(
+          chartElement,
           getChartOptions(),
         );
-        chart.render();
+        chart.render()
+
+        chartElement.addEventListener('htmx:beforeCleanupElement', function () {
+          chart.destroy()
+          chart = undefined;
+        })
       }
-    });
+    }
+    htmx.on("htmx:load", initChart);
   </script>
 {{ end }}

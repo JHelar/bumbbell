@@ -332,7 +332,7 @@ func GetAllWorkoutSetsForExercise(exerciseId int64, db *sql.DB) ([]WorkoutSet, e
 	`, exerciseId)
 
 	if err != nil {
-		log.Printf("GetAllWorkoutSets error: %s", err.Error())
+		log.Printf("GetAllWorkoutSetsForExercise error: %s", err.Error())
 		return nil, err
 	}
 
@@ -340,7 +340,7 @@ func GetAllWorkoutSetsForExercise(exerciseId int64, db *sql.DB) ([]WorkoutSet, e
 	for rows.Next() {
 		workoutSet := WorkoutSet{}
 		if err = rows.Scan(&workoutSet.SetNumber, &workoutSet.WorkoutID, &workoutSet.ExerciseID, &workoutSet.StartedAt, &workoutSet.CompletedAt, &workoutSet.SetRating, &workoutSet.WeightTo, &workoutSet.WeightFrom, &workoutSet.RepsFrom, &workoutSet.RepsTo); err != nil {
-			log.Printf("GetAllWorkoutSets Error: %s", err.Error())
+			log.Printf("GetAllWorkoutSetsForExercise Error: %s", err.Error())
 			break
 		}
 		workoutSets = append(workoutSets, workoutSet)

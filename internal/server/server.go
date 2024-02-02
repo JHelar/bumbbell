@@ -17,8 +17,9 @@ import (
 )
 
 type HttpServer struct {
-	DB             *sql.DB
-	WorkoutService service.WorkoutService
+	DB              *sql.DB
+	WorkoutService  service.WorkoutService
+	ExerciseService service.ExerciseService
 }
 
 var upgrader = websocket.Upgrader{}
@@ -115,8 +116,9 @@ func NewServer() (*http.Server, error) {
 		return nil, err
 	}
 	server := &HttpServer{
-		DB:             db,
-		WorkoutService: service.NewWorkoutService(db),
+		DB:              db,
+		WorkoutService:  service.NewWorkoutService(db),
+		ExerciseService: service.NewExerciseService(db),
 	}
 
 	handler := mux.NewHttpMux()

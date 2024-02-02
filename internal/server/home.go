@@ -1,6 +1,7 @@
 package server
 
 import (
+	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
 	"dumbbell/internal/templates"
 	"net/http"
@@ -12,9 +13,10 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		HasActiveWorkout: false,
 	}
 
-	activeWorkout, err := s.WorkoutService.GetActiveWorkout(TEST_USER_ID)
+	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
 	if err == nil {
-		viewModel.ActiveWorkout = activeWorkout
+		activeWorkoutData, _ := s.WorkoutService.GetActiveWorkoutData(TEST_USER_ID, activeWorkout.ID)
+		viewModel.ActiveWorkout = activeWorkoutData
 		viewModel.HasActiveWorkout = true
 	}
 

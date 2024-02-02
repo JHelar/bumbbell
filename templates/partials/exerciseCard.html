@@ -4,15 +4,18 @@
     hx-trigger="click"
     name="exercise"
     value="{{ .ID }}"
-    class="text-left block min-w-fit p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+    class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 text-white rounded-lg flex items-center pr-4 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
   >
-    <h5
-      class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-    >
-      {{ .Name }}
-    </h5>
-    <p class="font-normal text-gray-700 dark:text-gray-400">
-      {{ .Description }}
-    </p>
+    <img
+      class="me-3 w-14 h-full object-cover object-center rounded-s-lg"
+      src="{{ .ImageSrc }}"
+      alt="{{ .Name }}"
+    />
+    <div class="py-2.5 text-left rtl:text-right">
+      <span class="block mb-1 text-xs">{{ .Description }}</span>
+      <span class="block -mt-1 font-sans text-sm font-semibold"
+        >{{ .Name }}</span
+      >
+    </div>
   </button>
 {{ end }}
