@@ -26,8 +26,7 @@
     <div class="py-6" id="donut-chart-{{ .ID }}"></div>
 
     <script>
-      htmx.on("htmx:load", function () {
-        const getChartOptions = () => {
+      loadChart(() => {
           return {
             series: [{{ .TotalGoodRatings }}, {{ .TotalBadRatings }}],
             colors: ["#34d399", "#fb7185"],
@@ -95,27 +94,12 @@
               },
             },
           };
-        };
-
-        const chartElement = document.getElementById("donut-chart-{{ .ID }}")
-        const chartData = {
+        }, "#donut-chart-{{ .ID }}", (chart) => {
+          const chartData = {
           {{ range .Exercises }}
             "{{ .ID }}": [{{ .GoodRatings }}, {{ .BadRatings }}],
             {{ end }}
-        }
-        if (
-          chartElement &&
-          typeof ApexCharts !== "undefined"
-        ) {
-          const chart = new ApexCharts(
-            chartElement,
-            getChartOptions(),
-          );
-          chart.render();
-
-          chartElement.addEventListener('htmx:beforeCleanupElement', function () {
-            chart.destroy()
-          })
+          }
 
           const checkboxes = document.querySelectorAll('#exercises-{{ .ID }} input[type="checkbox"]');
           checkboxes.forEach((checkbox) => {
@@ -130,8 +114,7 @@
               chart.updateSeries(checkedValues.reduce(([totalGood, totalBad], value) => [totalGood + chartData[value][0], totalBad + chartData[value][1]], [0, 0]))
             }
           }
-        }
-      });
+        })
     </script>
   </div>
 {{ end }}

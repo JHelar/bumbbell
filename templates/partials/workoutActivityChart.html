@@ -47,8 +47,7 @@
   </div>
 
   <script>
-    htmx.on("htmx:load", function () {
-      const options = {
+    loadChart(() => ({
         colors: ["#1A56DB", "#FDBA8C"],
         series: [
           {
@@ -143,23 +142,6 @@
         fill: {
           opacity: 1,
         },
-      };
-
-      const chartElement = document.getElementById("column-chart");
-      if (
-        chartElement &&
-        typeof ApexCharts !== "undefined"
-      ) {
-        const chart = new ApexCharts(
-          document.getElementById("column-chart"),
-          options,
-        );
-        chart.render();
-
-        chartElement.addEventListener('htmx:beforeCleanupElement', function () {
-            chart.destroy()
-          })
-      }
-    });
+      }), '#column-chart')
   </script>
 {{ end }}
