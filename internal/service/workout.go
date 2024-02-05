@@ -44,7 +44,7 @@ func (s *WorkoutService) GetActiveWorkoutData(userId int64, workoutId int64) (mo
 	split, _ := dto.GetSplit(userId, workout.SplitID, s.DB)
 
 	allExercises, _ := dto.GetAllExercises(workout.SplitID, s.DB)
-	availableExercises, _ := dto.GetAvailableExercises(workout.SplitID, workout.ID, s.DB)
+	availableExercises, _ := dto.GetRemainingWorkoutExercises(workout.SplitID, workout.ID, s.DB)
 	activeWorkoutSet, _ := dto.GetActiveWorkoutSet(workout.ID, s.DB)
 
 	all := len(allExercises)
@@ -191,7 +191,7 @@ func (s *WorkoutService) GetWorkoutSplits(userId int64) ([]model.WorkoutSplitMod
 }
 
 func (s *WorkoutService) GetAvailableExercises(splitId int64, workoutId int64) ([]model.CardViewModel, error) {
-	exercises, err := dto.GetAvailableExercises(splitId, workoutId, s.DB)
+	exercises, err := dto.GetWorkoutExercises(splitId, workoutId, s.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -204,6 +204,7 @@ func (s *WorkoutService) GetAvailableExercises(splitId int64, workoutId int64) (
 			Description: exercise.Description,
 			WorkoutID:   workoutId,
 			ImageSrc:    exercise.GetImageURL(),
+			Disabled:    exercise.HasWorkoutSet,
 		})
 	}
 
@@ -228,6 +229,19 @@ func (s *WorkoutService) GetSplitCards(userId int64) ([]model.CardViewModel, err
 	return cards, nil
 }
 
+func GetWorkoutMetaData(workout dto.Workout) model.WorkoutMetadataModel {
+	workoutStartString := workout.StartedAt.Format("15:04 2006-01-02")
+	workoutDuration := time.Now().Sub(workout.StartedAt)
+	workoutDurationString := utils.FmtDuration(workoutDuration)
+	startedAt := workout.StartedAt.UnixMilli()
+
+	return model.WorkoutMetadataModel{
+		WorkoutStart:     workoutStartString,
+		WorkoutDuration:  workoutDurationString,
+		WorkoutStartedAt: startedAt,
+	}
+}
+
 func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (model.PickExerciseModel, error) {
 	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
 	if err != nil {
@@ -238,7 +252,15 @@ func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (mo
 	if err != nil {
 		return model.PickExerciseModel{}, err
 	}
-	if len(exercises) == 0 {
+
+	hasRemainingExercises := false
+	for _, exercise := range exercises {
+		if !exercise.Disabled {
+			hasRemainingExercises = true
+			break
+		}
+	}
+	if !hasRemainingExercises {
 		return model.PickExerciseModel{}, ErrorNoExercises
 	}
 
@@ -247,16 +269,13 @@ func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (mo
 		return model.PickExerciseModel{}, err
 	}
 
-	workoutStartString := workout.StartedAt.Format("15:04 2006-01-02")
-	workoutDuration := time.Now().Sub(workout.StartedAt)
-	workoutDurationString := utils.FmtDuration(workoutDuration)
-	startedAt := workout.StartedAt.UnixMilli()
+	metadata := GetWorkoutMetaData(workout)
 	return model.PickExerciseModel{
-		Title:             "Dumbell",
-		Exercises:         exercises,
-		ActiveWorkout:     activeWorkoutData,
-		WorkoutStart:      workoutStartString,
-		WorkoutDuration:   workoutDurationString,
-		WorkoutStartMilli: startedAt,
+		Title:            "Dumbell",
+		Exercises:        exercises,
+		ActiveWorkout:    activeWorkoutData,
+		WorkoutStart:     metadata.WorkoutStart,
+		WorkoutDuration:  metadata.WorkoutDuration,
+		WorkoutStartedAt: metadata.WorkoutStartedAt,
 	}, nil
 }

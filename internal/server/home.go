@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
+	"dumbbell/internal/service"
 	"dumbbell/internal/templates"
 	"log"
 	"net/http"
@@ -19,8 +20,12 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
 	if err == nil {
 		activeWorkoutData, _ := s.WorkoutService.GetActiveWorkoutData(TEST_USER_ID, activeWorkout.ID)
+		workoutMetadata := service.GetWorkoutMetaData(activeWorkout)
 		viewModel.ActiveWorkout = activeWorkoutData
 		viewModel.HasActiveWorkout = true
+		viewModel.WorkoutStart = workoutMetadata.WorkoutStart
+		viewModel.WorkoutDuration = workoutMetadata.WorkoutDuration
+		viewModel.WorkoutStartedAt = workoutMetadata.WorkoutStartedAt
 	} else if err == sql.ErrNoRows {
 		splits, err := s.WorkoutService.GetSplitCards(TEST_USER_ID)
 		if err == nil {

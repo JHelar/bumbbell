@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"dumbbell/internal/db"
 	"dumbbell/internal/dto"
-	"dumbbell/internal/model"
 	"dumbbell/internal/mux"
 	"dumbbell/internal/service"
 	"fmt"
@@ -49,25 +48,6 @@ func makeHMREndpoint() func(http.ResponseWriter, *http.Request) {
 		ws.WriteMessage(1, id)
 		reader(ws)
 	}
-}
-
-func getExerciseCards(splitId int64, workoutId int64, db *sql.DB) []model.CardViewModel {
-	exercises, err := dto.GetAvailableExercises(splitId, workoutId, db)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cards := []model.CardViewModel{}
-	for _, exercise := range exercises {
-		cards = append(cards, model.CardViewModel{
-			ID:          exercise.ID,
-			WorkoutID:   workoutId,
-			Name:        exercise.Name,
-			Description: exercise.Description,
-		})
-	}
-
-	return cards
 }
 
 func (s *HttpServer) handleExerciseImage(w http.ResponseWriter, r *http.Request) {

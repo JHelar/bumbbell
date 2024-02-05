@@ -26,46 +26,13 @@
           <dd
             class="font-extrabold"
             id="workout-duration"
-            data-start="{{ .WorkoutStartMilli }}"
+            data-start="{{ .WorkoutStartedAt }}"
           >
             {{ .WorkoutDuration }}
           </dd>
         </dl>
         <script>
-          htmx.on("htmx:load", function () {
-            const workoutDurationElement =
-              document.getElementById("workout-duration");
-            if (!workoutDurationElement) {
-              return;
-            }
-            const workoutStart =
-              document.getElementById("workout-duration").dataset.start;
-            const updateWorkoutDuration = () => {
-              const duration = new Date(Date.now() - workoutStart);
-              const hours = duration.getUTCHours();
-              const minutes = duration.getUTCMinutes();
-              const seconds = duration.getUTCSeconds();
-
-              let formattedDuration = "";
-              if (hours > 0) {
-                formattedDuration += `${hours.toString().padStart(2, "0")}h `;
-              }
-              if (minutes > 0) {
-                formattedDuration += `${minutes.toString().padStart(2, "0")}m `;
-              }
-              formattedDuration += `${seconds.toString().padStart(2, "0")}s`;
-
-              workoutDurationElement.textContent = formattedDuration;
-            };
-            const intervalId = setInterval(updateWorkoutDuration, 1000);
-
-            workoutDurationElement.addEventListener(
-              "htmx:beforeCleanupElement",
-              function () {
-                clearInterval(intervalId);
-              },
-            );
-          });
+          initDurationCounter("#workout-duration");
         </script>
       </section>
       <section
@@ -86,7 +53,7 @@
         class="md:col-start-3 md:col-end-4 md:row-start-1 md:row-end-3 col-span-full self-stretch flex flex-col max-h-full h-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
       >
         <h2
-          class="leading-none text-gray-900 dark:text-white text-xl md:text-2xl font-extrabold mb-2"
+          class="leading-none text-gray-900 dark:text-white text-2xl md:text-2xl font-extrabold mb-6"
         >
           Progress
         </h2>

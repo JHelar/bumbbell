@@ -27,6 +27,7 @@ type CardViewModel struct {
 	ImageSrc    string
 	Name        string
 	Description string
+	Disabled    bool
 }
 
 type EditExerciseTableRowModel struct {
@@ -78,6 +79,9 @@ type DashboardPageModel struct {
 	Title             string
 	HasActiveWorkout  bool
 	ActiveWorkout     ActiveWorkoutModel
+	WorkoutStart      string
+	WorkoutDuration   string
+	WorkoutStartedAt  int64
 	LatestWorkoutSets LatestWorkoutSetsModel
 	Splits            []CardViewModel
 	WorkoutActivity   WorkoutActivityModel
@@ -138,10 +142,16 @@ type WorkoutSplitExerciseModel struct {
 }
 
 type PickExerciseModel struct {
-	Title             string
-	Exercises         []CardViewModel
-	ActiveWorkout     ActiveWorkoutModel
-	WorkoutStart      string
-	WorkoutDuration   string
-	WorkoutStartMilli int64
+	Title            string
+	Exercises        []CardViewModel
+	ActiveWorkout    ActiveWorkoutModel
+	WorkoutStart     string
+	WorkoutDuration  string
+	WorkoutStartedAt int64
+}
+
+type WorkoutMetadataModel struct {
+	WorkoutStart     string
+	WorkoutDuration  string
+	WorkoutStartedAt int64
 }

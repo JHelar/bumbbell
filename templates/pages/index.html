@@ -8,9 +8,9 @@
     >
       <section class="md:col-span-2 col-span-full">
         <div
-          class="grid grid-cols-[minmax(0,_1fr)_minmax(0,_1fr)_max-content] gap-x-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 mb-8"
+          class="grid grid-cols-[minmax(0,_1fr)_minmax(0,_1fr)_max-content] gap-8 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 mb-8"
         >
-          <div class="col-span-2">
+          <div class="col-span-full sm:col-span-2">
             <h1
               class="leading-none text-gray-900 dark:text-white text-3xl md:text-5xl font-extrabold mb-2"
             >
@@ -29,7 +29,25 @@
                 Time to get started!
               {{ end }}
             </p>
+
             {{ if .HasActiveWorkout }}
+              <dl
+                class="grid grid-cols-[auto_minmax(0,_1fr)] gap-x-2 gap-y-4 leading-none text-gray-900 dark:text-white mb-6"
+              >
+                <dt class="text-gray-500 dark:text-gray-400">Started</dt>
+                <dd class="font-extrabold">{{ .WorkoutStart }}</dd>
+                <dt class="text-gray-500 dark:text-gray-400">Duration</dt>
+                <dd
+                  class="font-extrabold"
+                  id="workout-duration"
+                  data-start="{{ .WorkoutStartedAt }}"
+                >
+                  {{ .WorkoutDuration }}
+                </dd>
+              </dl>
+              <script>
+                initDurationCounter("#workout-duration");
+              </script>
               <a
                 href="/workout"
                 class="inline-flex justify-center items-center py-2.5 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900"
@@ -61,7 +79,9 @@
             {{ end }}
           </div>
           {{ if .HasActiveWorkout }}
-            {{ template "activeWorkoutChart" .ActiveWorkout }}
+            <div class="col-span-full sm:col-span-1">
+              {{ template "activeWorkoutChart" .ActiveWorkout }}
+            </div>
           {{ end }}
         </div>
         <div class="grid md:grid-cols-2 gap-8">
@@ -169,7 +189,7 @@
         <div
           class="flex flex-col max-h-full h-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 overflow-hidden"
         >
-          <div class="overflow-y-auto flex-1" style="contain: size;">
+          <div class="overflow-y-auto flex-1 sm:[contain:size]">
             {{ range .WorkoutSplits }}
               {{ template "workoutSplitChart" . }}
             {{ end }}

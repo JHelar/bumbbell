@@ -8,15 +8,16 @@ import (
 )
 
 type Exercise struct {
-	ID          int64
-	SplitID     int64
-	Name        string
-	Description string
-	WeightFrom  float64
-	WeightTo    float64
-	RepsFrom    float64
-	RepsTo      float64
-	Sets        int64
+	ID            int64
+	SplitID       int64
+	Name          string
+	Description   string
+	WeightFrom    float64
+	WeightTo      float64
+	RepsFrom      float64
+	RepsTo        float64
+	Sets          int64
+	HasWorkoutSet bool
 }
 
 func (e *Exercise) GetImageURL() string {
@@ -170,7 +171,7 @@ func DeleteExercise(exerciseId int64, db *sql.DB) error {
 	return err
 }
 
-func GetAvailableExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exercise, error) {
+func GetRemainingWorkoutExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exercise, error) {
 	rows, err := db.Query(`
 	SELECT ID, SplitID, Name, Description, WeightFrom, WeightTo, RepsFrom, RepsTo, Sets FROM exercises 
 	WHERE ID NOT IN (
@@ -179,9 +180,9 @@ func GetAvailableExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exerci
 		WHERE WorkoutID=?
 	) 
 	AND SplitID=?
-	`, workoutId, splitId)
+`, workoutId, splitId)
 	if err != nil {
-		log.Printf("GetAvailableExercises Error: %s", err.Error())
+		log.Printf("GetRemainingWorkoutExercises Error: %s", err.Error())
 		return nil, err
 	}
 
@@ -189,7 +190,33 @@ func GetAvailableExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exerci
 	for rows.Next() {
 		exercise := Exercise{}
 		if err = rows.Scan(&exercise.ID, &exercise.SplitID, &exercise.Name, &exercise.Description, &exercise.WeightFrom, &exercise.WeightTo, &exercise.RepsFrom, &exercise.RepsTo, &exercise.Sets); err != nil {
-			log.Printf("GetAvailableExercises Error: %s", err.Error())
+			log.Printf("GetRemainingWorkoutExercises Error: %s", err.Error())
+			break
+		}
+		exercises = append(exercises, exercise)
+	}
+
+	return exercises, err
+}
+
+func GetWorkoutExercises(splitId int64, workoutId int64, db *sql.DB) ([]Exercise, error) {
+	rows, err := db.Query(`
+    SELECT DISTINCT e.ID, e.SplitID, e.Name, e.Description, e.WeightFrom, e.WeightTo, e.RepsFrom, e.RepsTo, e.Sets,
+        CASE WHEN ws.ExerciseID IS NULL THEN 0 ELSE 1 END AS HasWorkoutSet
+    FROM exercises e
+    LEFT JOIN workout_sets ws ON e.ID = ws.ExerciseID AND ws.WorkoutID = ?
+    WHERE e.SplitID = ?
+`, workoutId, splitId)
+	if err != nil {
+		log.Printf("GetWorkoutExercises Error: %s", err.Error())
+		return nil, err
+	}
+
+	exercises := []Exercise{}
+	for rows.Next() {
+		exercise := Exercise{}
+		if err = rows.Scan(&exercise.ID, &exercise.SplitID, &exercise.Name, &exercise.Description, &exercise.WeightFrom, &exercise.WeightTo, &exercise.RepsFrom, &exercise.RepsTo, &exercise.Sets, &exercise.HasWorkoutSet); err != nil {
+			log.Printf("GetWorkoutExercises Error: %s", err.Error())
 			break
 		}
 		exercises = append(exercises, exercise)
