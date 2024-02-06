@@ -19,6 +19,7 @@ type HttpServer struct {
 	DB              *sql.DB
 	WorkoutService  service.WorkoutService
 	ExerciseService service.ExerciseService
+	SessionService  service.SessionService
 }
 
 var upgrader = websocket.Upgrader{}
@@ -81,32 +82,43 @@ func NewServer() (*http.Server, error) {
 		DB:              db,
 		WorkoutService:  service.NewWorkoutService(db),
 		ExerciseService: service.NewExerciseService(db),
+		SessionService:  service.NewSessionService(db),
 	}
 
-	handler := mux.NewHttpMux()
+	handler := mux.NewHttpMux("")
 
 	fs := http.FileServer(http.Dir("./public"))
 	handler.Handle("/public/", http.StripPrefix("/public/", fs))
 
-	handler.HandleFunc("/user", server.userHandler)
+	userRouter := handler.Use("/user", server.SessionService.AuthMiddleware)
+	userRouter.HandleFunc("", server.settingsPageHandler)
+
 	handler.HandleFunc("/exercise/image/(?P<id>[\\d]+)", server.handleExerciseImage)
 
-	handler.HandleFunc("/workout", server.workoutPageHandler)
+	workoutRouter := handler.Use("/workout", server.SessionService.AuthMiddleware)
+	workoutRouter.HandleFunc("", server.workoutPageHandler)
+	workoutRouter.PostFunc("/start", server.startWorkoutHandler)
+	workoutRouter.DeleteFunc("/abort", server.abortWorkout)
+	workoutRouter.PostFunc("/(?P<workoutId>[\\d]+)/exercise/start", server.startExerciseHandler)
+	workoutRouter.PostFunc("/(?P<workoutId>[\\d]+)/exercise/next", server.nextExerciseHandler)
 
-	handler.PostFunc("/htmx/workout/start", server.startWorkoutHandler)
-	handler.DeleteFunc("/htmx/workout/abort", server.abortWorkout)
-	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/start", server.startExerciseHandler)
-	handler.PostFunc("/htmx/workout/(?P<workoutId>[\\d]+)/exercise/next", server.nextExerciseHandler)
+	settingsRouter := handler.Use("/split", server.SessionService.AuthMiddleware)
+	settingsRouter.GetFunc("/new", server.newSplit)
+	settingsRouter.GetFunc("/(?P<splitId>[\\d]+)/edit", server.editSplit)
+	settingsRouter.PostFunc("/(?P<splitId>[\\d]+)/save", server.saveSplit)
+	settingsRouter.DeleteFunc("/(?P<splitId>[\\d]+)/delete", server.deleteSplit)
 
-	handler.GetFunc("/htmx/split/new", server.newSplit)
-	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/edit", server.editSplit)
-	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/save", server.saveSplit)
-	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/delete", server.deleteSplit)
+	settingsRouter.GetFunc("/(?P<splitId>[\\d]+)/exercise/new", server.newExercise)
+	settingsRouter.GetFunc("/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/edit", server.editExercise)
+	settingsRouter.PostFunc("/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/save", server.saveExercise)
+	settingsRouter.DeleteFunc("/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
 
-	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/new", server.newExercise)
-	handler.GetFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/edit", server.editExercise)
-	handler.PostFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/save", server.saveExercise)
-	handler.DeleteFunc("/htmx/split/(?P<splitId>[\\d]+)/exercise/(?P<id>[\\d]+)/delete", server.deleteExercise)
+	handler.GetFunc("/login", server.loginPageHandler)
+	handler.PostFunc("/login", server.LoginUser)
+
+	handler.GetFunc("/signup", server.signupPageHandler)
+	handler.PostFunc("/signup", server.RegisterUser)
+	handler.GetFunc("/logout", server.LogoutUser)
 
 	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
 	handler.HandleFunc("/", server.homeHandler)

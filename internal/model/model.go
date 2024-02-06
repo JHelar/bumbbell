@@ -54,6 +54,7 @@ type EditWorkoutTableSplitModel struct {
 type UserSettingsModel struct {
 	Title  string
 	Splits []EditWorkoutTableSplitModel
+	Header HeaderModel
 }
 
 type EditExerciseModel struct {
@@ -86,6 +87,7 @@ type DashboardPageModel struct {
 	Splits            []CardViewModel
 	WorkoutActivity   WorkoutActivityModel
 	WorkoutSplits     []WorkoutSplitModel
+	Header            HeaderModel
 }
 
 type ActiveWorkoutModel struct {
@@ -148,10 +150,22 @@ type PickExerciseModel struct {
 	WorkoutStart     string
 	WorkoutDuration  string
 	WorkoutStartedAt int64
+	Header           HeaderModel
 }
 
 type WorkoutMetadataModel struct {
 	WorkoutStart     string
 	WorkoutDuration  string
 	WorkoutStartedAt int64
+}
+
+type LoginPageModel struct {
+	Title  string
+	Header HeaderModel
+}
+
+type HeaderModel struct {
+	IsLoggedIn   bool
+	UserImageSrc string
+	UserEmail    string
 }

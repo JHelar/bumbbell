@@ -1,8 +1,12 @@
 <!doctype html>
 <html lang="en">
   {{ template "head" . }}
-  <body class="bg-zinc-800 min-h-dvh p-6 relative">
-    <main class="mx-auto container">
+  <body class="bg-white dark:bg-zinc-800 dark">
+    {{ template "header" .Header }}
+    <main
+      class="max-w-screen-xl mx-auto container min-h-dvh py-8 px-4 relative"
+      id="container"
+    >
       {{ template "pageTitle" "Settings" }}
       <h2 class="text-white text-2xl">Splits</h2>
       <div class="flex flex-col gap-y-8" id="split-tables">
@@ -15,7 +19,7 @@
           type="button"
           type="button"
           hx-trigger="click"
-          hx-get="/htmx/split/new"
+          hx-get="/split/new"
           hx-swap="none"
           class="flex items-center justify-center text-white bg-emerald-700 rounded-full w-14 h-14 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 focus:outline-none dark:focus:ring-emerald-800"
         >

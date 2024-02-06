@@ -8,6 +8,7 @@ import (
 const HttpMethodAny string = "*"
 
 type HttpMux struct {
+	prefix string
 	routes map[string][]*Route
 }
 
@@ -16,8 +17,9 @@ type Route struct {
 	handler http.Handler
 }
 
-func NewHttpMux() *HttpMux {
+func NewHttpMux(prefix string) *HttpMux {
 	return &HttpMux{
+		prefix: prefix,
 		routes: make(map[string][]*Route),
 	}
 }
@@ -76,9 +78,20 @@ func (mux *HttpMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
+func (mux *HttpMux) Use(pattern string, middlewares ...func(http.Handler) http.Handler) *HttpMux {
+	useMux := NewHttpMux(pattern)
+	handler := http.Handler(useMux)
+	for _, middleware := range middlewares {
+		handler = middleware(handler)
+	}
+	mux.addRouteHandler(HttpMethodAny, pattern, handler)
+
+	return useMux
+}
+
 func (mux *HttpMux) addRouteHandler(verb string, pattern string, handler http.Handler) {
 	mux.routes[verb] = append(mux.routes[verb], &Route{
-		pattern: regexp.MustCompile(pattern),
+		pattern: regexp.MustCompile(mux.prefix + pattern),
 		handler: handler,
 	})
 }

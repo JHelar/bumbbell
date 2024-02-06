@@ -2,8 +2,9 @@
 <html lang="en">
   {{ template "head" . }}
   <body class="bg-white dark:bg-zinc-800 dark">
+    {{ template "header" .Header }}
     <main
-      class="grid grid-cols-3 gap-8 py-8 px-4 mx-auto max-w-screen-xl lg:py-16"
+      class="grid grid-cols-3 gap-8 py-8 px-4 mx-auto max-w-screen-xl"
       id="container"
     >
       <section class="md:col-span-2 col-span-full">
@@ -71,7 +72,7 @@
                 </svg>
               </a>
             {{ else }}
-              <div class="grid grid-flow-col-dense auto-cols-fr gap-4">
+              <div class="flex flex-row flex-wrap gap-4">
                 {{ range .Splits }}
                   {{ template "splitCard" . }}
                 {{ end }}

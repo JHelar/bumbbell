@@ -11,15 +11,23 @@ import (
 )
 
 func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
+	if !s.SessionService.IsAuthenticated(r) {
+		w.Header().Add("HX-Replace-Url", "/login")
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	userId := s.SessionService.MustGetUserId(w, r)
 	viewModel := model.DashboardPageModel{
 		Title:            "Dumbell",
 		HasActiveWorkout: false,
 		Splits:           nil,
+		Header:           s.SessionService.GetHeaderModel(r),
 	}
 
-	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
+	activeWorkout, err := dto.GetActiveWorkout(userId, s.DB)
 	if err == nil {
-		activeWorkoutData, _ := s.WorkoutService.GetActiveWorkoutData(TEST_USER_ID, activeWorkout.ID)
+		activeWorkoutData, _ := s.WorkoutService.GetActiveWorkoutData(userId, activeWorkout.ID)
 		workoutMetadata := service.GetWorkoutMetaData(activeWorkout)
 		viewModel.ActiveWorkout = activeWorkoutData
 		viewModel.HasActiveWorkout = true
@@ -27,7 +35,7 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		viewModel.WorkoutDuration = workoutMetadata.WorkoutDuration
 		viewModel.WorkoutStartedAt = workoutMetadata.WorkoutStartedAt
 	} else if err == sql.ErrNoRows {
-		splits, err := s.WorkoutService.GetSplitCards(TEST_USER_ID)
+		splits, err := s.WorkoutService.GetSplitCards(userId)
 		if err == nil {
 			viewModel.Splits = splits
 		} else {
@@ -41,17 +49,17 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	latestWorkoutSets, err := s.WorkoutService.GetLatestWorkoutSets(TEST_USER_ID)
+	latestWorkoutSets, err := s.WorkoutService.GetLatestWorkoutSets(userId)
 	if err == nil {
 		viewModel.LatestWorkoutSets = latestWorkoutSets
 	}
 
-	workoutActivity, err := s.WorkoutService.GetWorkoutActivity(TEST_USER_ID)
+	workoutActivity, err := s.WorkoutService.GetWorkoutActivity(userId)
 	if err == nil {
 		viewModel.WorkoutActivity = workoutActivity
 	}
 
-	workoutSplits, err := s.WorkoutService.GetWorkoutSplits(TEST_USER_ID)
+	workoutSplits, err := s.WorkoutService.GetWorkoutSplits(userId)
 	if err == nil {
 		viewModel.WorkoutSplits = workoutSplits
 	}

@@ -1,6 +1,6 @@
 {{ define "exerciseCard" }}
   <button
-    hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/start"
+    hx-post="/workout/{{ .WorkoutID }}/exercise/start"
     hx-trigger="click"
     {{ if .Disabled }}
       disabled hx-disable

@@ -40,7 +40,7 @@
     {{ if .Sets.Htmx }}hx-swap-oob="true"{{ end }}
   >
     <button
-      hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/next"
+      hx-post="/workout/{{ .WorkoutID }}/exercise/next"
       hx-trigger="click"
       hx-swap="none"
       name="rating"
@@ -80,7 +80,7 @@
       <span class="sr-only">Rate exercise: bad</span>
     </button>
     <button
-      hx-post="/htmx/workout/{{ .WorkoutID }}/exercise/next"
+      hx-post="/workout/{{ .WorkoutID }}/exercise/next"
       hx-trigger="click"
       hx-swap="none"
       name="rating"

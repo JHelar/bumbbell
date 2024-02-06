@@ -1,5 +1,7 @@
 [
     {
-        "ID": 1
+        "ID": 1,
+        "Email": "john.helarsson@gmail.com",
+        "PasswordHash": "$2a$12$z0mJFajtomHV7Xg/3kZWsOqnr2JLxUzYxuHEYwkkT/MaOvRQcIQ/."
     }
 ]

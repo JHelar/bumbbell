@@ -128,21 +128,17 @@ func (s *WorkoutService) GetWorkoutActivity(userId int64) (model.WorkoutActivity
 		}
 	}
 
-	thisYearMonthAverage := 0.0
-	lastYearMonthAverage := 0.0
 	for i := range months {
 		months[i].Month = MONTH_NAMES[i]
-		thisYearMonthAverage += float64(months[i].ThisYearActivity)
-		lastYearMonthAverage += float64(months[i].LastYearActivity)
 	}
 
-	thisYearMonthAverage = thisYearMonthAverage / float64(len(months))
-	lastYearMonthAverage = lastYearMonthAverage / float64(len(months))
-	monthAverageDiff := utils.Change(int(lastYearMonthAverage), int(thisYearMonthAverage))
+	thisYearMonthCount := months[time.Now().Month()-1].ThisYearActivity
+	lastYearMonthCount := months[time.Now().Month()-1].LastYearActivity
+	monthAverageDiff := utils.Change(int(lastYearMonthCount), int(thisYearMonthCount))
 
 	return model.WorkoutActivityModel{
 		Months:     months,
-		MonthCount: int(thisYearMonthAverage),
+		MonthCount: int(thisYearMonthCount),
 		MonthDiff:  int(monthAverageDiff),
 	}, nil
 }

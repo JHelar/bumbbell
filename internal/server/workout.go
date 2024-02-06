@@ -12,11 +12,12 @@ import (
 )
 
 func (s *HttpServer) startWorkoutHandler(w http.ResponseWriter, r *http.Request) {
+	userId := s.SessionService.MustGetUserId(w, r)
 	splitId, _ := strconv.ParseInt(r.FormValue("split"), 10, 64)
 
-	workout, _ := dto.NewWorkout(splitId, TEST_USER_ID, s.DB)
+	workout, _ := dto.NewWorkout(splitId, userId, s.DB)
 
-	pickExerciseData, err := s.WorkoutService.GetPickExerciseModel(TEST_USER_ID, workout.ID)
+	pickExerciseData, err := s.WorkoutService.GetPickExerciseModel(userId, workout.ID)
 	if err != nil {
 		log.Printf("Error: in here %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -35,6 +36,7 @@ func (s *HttpServer) startWorkoutHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request) {
+	userId := s.SessionService.MustGetUserId(w, r)
 	workoutId := utils.MustParseInt64(r.FormValue("workoutId"))
 	exerciseId := utils.MustParseInt64(r.FormValue("exercise"))
 
@@ -43,7 +45,7 @@ func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request
 		log.Fatal(err.Error())
 	}
 
-	workout, err := dto.GetWorkout(TEST_USER_ID, workoutId, s.DB)
+	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -83,10 +85,11 @@ func (s *HttpServer) startExerciseHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request) {
+	userId := s.SessionService.MustGetUserId(w, r)
 	workoutId := utils.MustParseInt64(r.FormValue("workoutId"))
 	rating := r.FormValue("rating")
 
-	workout, err := dto.GetWorkout(TEST_USER_ID, workoutId, s.DB)
+	workout, err := dto.GetWorkout(userId, workoutId, s.DB)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -94,7 +97,7 @@ func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request)
 	newSet, err := dto.CreateNextSet(workout.ID, dto.SetStatus(rating), s.DB)
 	if err != nil {
 		if err == dto.ErrorSetLimitReached {
-			pickExerciseData, err := s.WorkoutService.GetPickExerciseModel(TEST_USER_ID, workout.ID)
+			pickExerciseData, err := s.WorkoutService.GetPickExerciseModel(userId, workout.ID)
 			if err == nil {
 				w.Header().Add("HX-Reselect", "#container")
 				w.Header().Add("HX-Retarget", "#container")
@@ -145,14 +148,15 @@ func (s *HttpServer) nextExerciseHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *HttpServer) abortWorkout(w http.ResponseWriter, r *http.Request) {
-	activeWorkout, err := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
+	userId := s.SessionService.MustGetUserId(w, r)
+	activeWorkout, err := dto.GetActiveWorkout(userId, s.DB)
 	if err != nil {
 		log.Printf("Error getting active workout: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	err = dto.DeleteWorkout(TEST_USER_ID, activeWorkout.ID, s.DB)
+	err = dto.DeleteWorkout(userId, activeWorkout.ID, s.DB)
 	if err != nil {
 		log.Printf("Error getting active workout: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -163,7 +167,8 @@ func (s *HttpServer) abortWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) {
-	activeWorkout, activeWorkoutErr := dto.GetActiveWorkout(TEST_USER_ID, s.DB)
+	userId := s.SessionService.MustGetUserId(w, r)
+	activeWorkout, activeWorkoutErr := dto.GetActiveWorkout(userId, s.DB)
 	if activeWorkoutErr == nil {
 		activeWorkoutSet, activeWorkoutSetErr := dto.GetActiveWorkoutSet(activeWorkout.ID, s.DB)
 		if activeWorkoutSetErr == nil {
@@ -208,10 +213,11 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		pickExerciseData, pickExerciseErr := s.WorkoutService.GetPickExerciseModel(TEST_USER_ID, activeWorkout.ID)
+		pickExerciseData, pickExerciseErr := s.WorkoutService.GetPickExerciseModel(userId, activeWorkout.ID)
 		if pickExerciseErr != nil {
 			if pickExerciseErr == service.ErrorNoExercises {
 				dto.CompleteWorkout(activeWorkout.ID, s.DB)
+				w.Header().Add("HX-Replace-Url", "/")
 				http.Redirect(w, r, "/", http.StatusMovedPermanently)
 				return
 			}
@@ -223,6 +229,7 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 			log.Print("No pickExerciseData workoutpagehandler")
 		}
 
+		pickExerciseData.Header = s.SessionService.GetHeaderModel(r)
 		templateErr := templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
 		if templateErr != nil {
 			log.Printf("Error: in here %s", templateErr.Error())
@@ -233,6 +240,6 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 		log.Print("No active workout")
 	}
 
-	w.Header().Add("HX-Push-Url", "/")
+	w.Header().Add("HX-Replace-Url", "/")
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }

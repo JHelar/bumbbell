@@ -2,7 +2,7 @@
   <form
     id="edit-split-drawer"
     hx-encoding="multipart/form-data"
-    hx-post="/htmx/split/{{ .ID }}/save"
+    hx-post="/split/{{ .ID }}/save"
     hx-swap="delete swap:150ms"
     class="fixed top-0 left-0 z-40 w-full h-screen max-w-xl"
     tabindex="-1"
@@ -61,7 +61,7 @@
           Save
         </button>
         <button
-          hx-delete="/htmx/split/{{ .ID }}/delete"
+          hx-delete="/split/{{ .ID }}/delete"
           hx-trigger="click"
           hx-target="#split-{{ .ID }}"
           hx-confirm="Are you sure you wish to delete the split?"
@@ -120,7 +120,7 @@
         <button
           type="button"
           hx-trigger="click"
-          hx-get="/htmx/split/{{ .ID }}/exercise/new"
+          hx-get="/split/{{ .ID }}/exercise/new"
           hx-swap="none"
           class="flex items-center justify-center text-white bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-emerald-600 dark:hover:bg-emerald-700 focus:outline-none dark:focus:ring-emerald-800"
         >
@@ -142,7 +142,7 @@
         <button
           type="button"
           hx-trigger="click"
-          hx-get="/htmx/split/{{ .ID }}/edit"
+          hx-get="/split/{{ .ID }}/edit"
           hx-swap="none"
           class="flex-shrink-0 inline-flex items-center justify-center py-2 px-3 text-xs font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
         >

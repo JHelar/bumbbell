@@ -2,8 +2,9 @@
 <html lang="en">
   {{ template "head" . }}
   <body class="bg-white dark:bg-zinc-800 dark">
+    {{ template "header" .Header }}
     <main
-      class="grid grid-cols-3 grid-rows-[auto_minmax(0,_1fr)] gap-8 py-8 px-4 mx-auto max-w-screen-xl lg:py-16"
+      class="grid grid-cols-3 grid-rows-[auto_minmax(0,_1fr)] gap-8 py-8 px-4 mx-auto max-w-screen-xl"
       id="container"
     >
       <section
