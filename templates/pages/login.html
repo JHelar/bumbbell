@@ -4,9 +4,8 @@
   <body class="bg-white dark:bg-zinc-800 dark">
     <form
       hx-post="/login"
-      hx-select="#container"
-      hx-target="#container"
-      hx-swap="outerHTML"
+      hx-target="body"
+      hx-swap="innerHTML"
       hx-trigger="submit"
       hx-replace-url="/"
       class="max-w-lg flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"

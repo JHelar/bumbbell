@@ -49,23 +49,37 @@ func (s *HttpServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	latestWorkoutSets, err := s.WorkoutService.GetLatestWorkoutSets(userId)
-	if err == nil {
-		viewModel.LatestWorkoutSets = latestWorkoutSets
+	latestWorkoutSets, latestWorkoutErr := s.WorkoutService.GetLatestWorkoutSets(userId)
+	viewModel.LatestWorkoutSets = latestWorkoutSets
+	if latestWorkoutErr != nil {
+		log.Print("Error getting latest workout sets: ", latestWorkoutErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	workoutActivity, err := s.WorkoutService.GetWorkoutActivity(userId)
-	if err == nil {
-		viewModel.WorkoutActivity = workoutActivity
+	workoutActivity, getWorkoutActivityErr := s.WorkoutService.GetWorkoutActivity(userId)
+	viewModel.WorkoutActivity = workoutActivity
+	if getWorkoutActivityErr != nil {
+		log.Printf("Error getting workout activity: %s", getWorkoutActivityErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	workoutSplits, err := s.WorkoutService.GetWorkoutSplits(userId)
-	if err == nil {
-		viewModel.WorkoutSplits = workoutSplits
+	workoutSplits, getWorkoutSplitsErr := s.WorkoutService.GetWorkoutSplits(userId)
+	viewModel.WorkoutSplits = workoutSplits
+	if getWorkoutSplitsErr != nil {
+		log.Printf("Error getting workout splits: %s", getWorkoutSplitsErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Add("HX-Reselect", "#container")
-	w.Header().Add("HX-Retarget", "#container")
-	w.Header().Add("HX-Reswap", "outerHTML")
+	if s.HtmxService.IsHtmxRequest(r) {
+		exercuseTemplateErr := templates.Home.Execute(w, viewModel)
+		if exercuseTemplateErr != nil {
+			log.Print("Error home template: ", exercuseTemplateErr.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
 	templates.ExecutePageTemplate(w, "index.html", viewModel)
 }

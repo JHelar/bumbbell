@@ -20,6 +20,7 @@ type HttpServer struct {
 	WorkoutService  service.WorkoutService
 	ExerciseService service.ExerciseService
 	SessionService  service.SessionService
+	HtmxService     service.HtmxService
 }
 
 var upgrader = websocket.Upgrader{}
@@ -83,12 +84,13 @@ func NewServer() (*http.Server, error) {
 		WorkoutService:  service.NewWorkoutService(db),
 		ExerciseService: service.NewExerciseService(db),
 		SessionService:  service.NewSessionService(db),
+		HtmxService:     service.NewHtmxService(),
 	}
 
 	handler := mux.NewHttpMux("")
 
 	fs := http.FileServer(http.Dir("./public"))
-	handler.Handle("/public/", http.StripPrefix("/public/", fs))
+	handler.Handle("/public/.*", http.StripPrefix("/public/", fs))
 
 	userRouter := handler.Use("/user", server.SessionService.AuthMiddleware)
 	userRouter.HandleFunc("", server.settingsPageHandler)

@@ -267,7 +267,7 @@ func (s *WorkoutService) GetPickExerciseModel(userId int64, workoutId int64) (mo
 
 	metadata := GetWorkoutMetaData(workout)
 	return model.PickExerciseModel{
-		Title:            "Dumbell",
+		Title:            "Dumbell - Workout",
 		Exercises:        exercises,
 		ActiveWorkout:    activeWorkoutData,
 		WorkoutStart:     metadata.WorkoutStart,

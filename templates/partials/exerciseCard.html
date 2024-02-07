@@ -2,20 +2,23 @@
   <button
     hx-post="/workout/{{ .WorkoutID }}/exercise/start"
     hx-trigger="click"
+    hx-swap="none"
     {{ if .Disabled }}
       disabled hx-disable
     {{ end }}
     name="exercise"
     value="{{ .ID }}"
-    class="w-full sm:w-auto disabled:opacity-75 disabled:hover:bg-gray-800 bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 text-white rounded-lg flex items-center pr-4 dark:bg-gray-700 disabled:dark:hover:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+    class="w-full sm:w-auto disabled:opacity-75 disabled:hover:bg-gray-800 bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 text-white rounded-lg flex items-center gap-x-3 pr-4 dark:bg-gray-700 disabled:dark:hover:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
   >
     <img
-      class="me-3 w-14 h-full object-cover object-center rounded-s-lg"
+      class="w-14 h-full object-cover object-center rounded-s-lg"
       src="{{ .ImageSrc }}"
       alt="{{ .Name }}"
     />
     <div class="py-2.5 text-left rtl:text-right flex-1">
-      <span class="block mb-1 text-xs">{{ .Description }}</span>
+      <span class="block mb-1 text-xs whitespace-nowrap"
+        >{{ .Description }}</span
+      >
       <span class="block -mt-1 font-sans text-sm font-semibold"
         >{{ .Name }}</span
       >

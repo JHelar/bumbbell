@@ -165,9 +165,9 @@ func CompleteWorkout(workoutId int64, db *sql.DB) error {
 }
 
 func CreateNewSet(workoutId int64, exerciseId int64, db *sql.DB) (WorkoutSet, error) {
-	_, err := GetActiveWorkoutSet(workoutId, db)
-	if err == nil {
-		return WorkoutSet{}, errors.New("NewSet Error a set is allready active")
+	_, getActiveWorkoutSetErr := GetActiveWorkoutSet(workoutId, db)
+	if getActiveWorkoutSetErr != sql.ErrNoRows {
+		return WorkoutSet{}, getActiveWorkoutSetErr
 	}
 
 	exercise, err := GetExercise(exerciseId, db)

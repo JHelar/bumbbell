@@ -1,51 +1,55 @@
 {{ define "exercise" }}
-  <div
-    class="max-w-md flex flex-col justify-end container flex-grow-0 flex-shrink-0 rounded-lg overflow-hidden shadow"
-  >
-    <img
-      class="flex-grow-0 rounded-t-lg object-top"
-      src="{{ .ImageSrc }}"
-      alt="{{ .Name }}"
-    />
+  <main class="h-dvh p-6 grid place-items-center" id="container">
     <div
-      class="p-6 flex flex-col gap-y-2 bg-white border-x border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+      class="max-w-md flex flex-col justify-end container flex-grow-0 flex-shrink-0 rounded-lg overflow-hidden shadow"
     >
-      {{ template "exerciseSets" .Sets }}
-      <h2
-        class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+      <img
+        class="flex-grow-0 rounded-t-lg object-top"
+        src="{{ .ImageSrc }}"
+        alt="{{ .Name }}"
+      />
+      <div
+        class="p-6 flex flex-col gap-y-2 bg-white border-x border-gray-200 dark:bg-gray-800 dark:border-gray-700"
       >
-        {{ .Name }}
-      </h2>
-      <p class="font-normal text-gray-700 dark:text-gray-400">
-        {{ .Description }}
-      </p>
-      <div class="flex items-baseline text-gray-900 dark:text-white">
-        <span class="text-2xl font-extrabold tracking-tight"
-          >{{ if (eq .WeightFrom .WeightTo ) }}
-            {{ .WeightFrom }}
-          {{ else }}
-            {{ .WeightFrom }} –
-            {{ .WeightTo }}
-          {{ end }}</span
+        {{ template "exerciseSets" .Sets }}
+        <h2
+          class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
-        <span class="ms-1 text-xl font-normal text-gray-500 dark:text-gray-400"
-          >/kg</span
-        >
+          {{ .Name }}
+        </h2>
+        <p class="font-normal text-gray-700 dark:text-gray-400">
+          {{ .Description }}
+        </p>
+        <div class="flex items-baseline text-gray-900 dark:text-white">
+          <span class="text-2xl font-extrabold tracking-tight"
+            >{{ if (eq .WeightFrom .WeightTo ) }}
+              {{ .WeightFrom }}
+            {{ else }}
+              {{ .WeightFrom }} –
+              {{ .WeightTo }}
+            {{ end }}</span
+          >
+          <span
+            class="ms-1 text-xl font-normal text-gray-500 dark:text-gray-400"
+            >/kg</span
+          >
+        </div>
+        <div class="flex items-baseline text-gray-900 dark:text-white">
+          <span class="text-2xl font-extrabold tracking-tight"
+            >{{ if (eq .RepsFrom .RepsTo ) }}
+              {{ .RepsFrom }}
+            {{ else }}
+              {{ .RepsFrom }} –
+              {{ .RepsTo }}
+            {{ end }}</span
+          >
+          <span
+            class="ms-1 text-xl font-normal text-gray-500 dark:text-gray-400"
+            >/reps</span
+          >
+        </div>
       </div>
-      <div class="flex items-baseline text-gray-900 dark:text-white">
-        <span class="text-2xl font-extrabold tracking-tight"
-          >{{ if (eq .RepsFrom .RepsTo ) }}
-            {{ .RepsFrom }}
-          {{ else }}
-            {{ .RepsFrom }} –
-            {{ .RepsTo }}
-          {{ end }}</span
-        >
-        <span class="ms-1 text-xl font-normal text-gray-500 dark:text-gray-400"
-          >/reps</span
-        >
-      </div>
+      {{ template "exerciseButtons" . }}
     </div>
-    {{ template "exerciseButtons" . }}
-  </div>
+  </main>
 {{ end }}

@@ -4,28 +4,67 @@
 
 .container,
 #container {
-    @apply overflow-y-clip;
+  @apply overflow-y-clip;
 }
 
 #edit-exercise-drawer.htmx-swapping,
 #edit-split-drawer.htmx-swapping {
+  > div:first-child {
+    @apply -translate-x-full;
+  }
+
+  & + .form-backdrop {
+    @apply opacity-0;
+  }
+}
+main.htmx-settling {
+  #edit-exercise-drawer,
+  #edit-split-drawer {
     > div:first-child {
-        @apply -translate-x-full;
+      @apply -translate-x-full;
     }
 
     & + .form-backdrop {
-        @apply opacity-0;
+      @apply opacity-0;
     }
+  }
 }
-main.htmx-settling {
-    #edit-exercise-drawer,
-    #edit-split-drawer {
-        > div:first-child {
-            @apply -translate-x-full;
-        }
 
-        & + .form-backdrop {
-            @apply opacity-0;
-        }
-    }
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-from-right {
+  from {
+    transform: translateX(90px);
+  }
+}
+
+@keyframes slide-to-left {
+  to {
+    transform: translateX(-90px);
+  }
+}
+
+::view-transition-old(slide-it) {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+}
+::view-transition-new(slide-it) {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+}
+
+.sample-transition {
+  view-transition-name: slide-it;
 }

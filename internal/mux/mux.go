@@ -1,15 +1,24 @@
 package mux
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 const HttpMethodAny string = "*"
 
+type MuxHandler interface {
+	MatchesPath(path string) bool
+	InsertUrlParams(r *http.Request)
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+}
+
 type HttpMux struct {
 	prefix string
-	routes map[string][]*Route
+	routes map[string][]MuxHandler
 }
 
 type Route struct {
@@ -17,10 +26,36 @@ type Route struct {
 	handler http.Handler
 }
 
+func (r *Route) MatchesPath(path string) bool {
+	isMatch := r.pattern.MatchString(path)
+	if isMatch {
+		log.Printf("Matches Route Path: pattern=%s path=%s, isMatch=%t", r.pattern.String(), path, isMatch)
+	}
+	return isMatch
+}
+
+func (r *Route) InsertUrlParams(req *http.Request) {
+	match := r.pattern.FindStringSubmatch(req.URL.Path)
+
+	// Hack to populate r.Form if encoding is set to multipart/form-data
+	req.FormValue("")
+	req.ParseForm()
+
+	for i, name := range r.pattern.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			req.Form.Add(name, match[i])
+		}
+	}
+}
+
+func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	r.handler.ServeHTTP(w, req)
+}
+
 func NewHttpMux(prefix string) *HttpMux {
 	return &HttpMux{
 		prefix: prefix,
-		routes: make(map[string][]*Route),
+		routes: make(map[string][]MuxHandler),
 	}
 }
 
@@ -67,45 +102,55 @@ func (mux *HttpMux) DeleteFunc(pattern string, handler func(http.ResponseWriter,
 func (mux *HttpMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	routes := append(mux.routes[r.Method], mux.routes[HttpMethodAny]...)
 	for _, route := range routes {
-		if route.pattern.MatchString(r.URL.Path) {
-			insertUrlParams(*route.pattern, r)
+		if route.MatchesPath(r.URL.Path) {
+			route.InsertUrlParams(r)
 
-			route.handler.ServeHTTP(w, r)
+			route.ServeHTTP(w, r)
 			return
 		}
 	}
 
+	log.Printf("No route matched: path=%s", r.URL.Path)
+
 	http.NotFound(w, r)
 }
 
+func (mux *HttpMux) MatchesPath(path string) bool {
+	isMatch := strings.HasPrefix(path, mux.prefix)
+
+	if isMatch {
+		log.Printf("Matches Mux Path: path=%s, isMatch=%t", path, isMatch)
+	}
+
+	return isMatch
+}
+
+func (mux *HttpMux) InsertUrlParams(r *http.Request) {
+	// Stump
+}
+
 func (mux *HttpMux) Use(pattern string, middlewares ...func(http.Handler) http.Handler) *HttpMux {
-	useMux := NewHttpMux(pattern)
+	useMux := NewHttpMux(mux.prefix + pattern)
 	handler := http.Handler(useMux)
 	for _, middleware := range middlewares {
 		handler = middleware(handler)
 	}
-	mux.addRouteHandler(HttpMethodAny, pattern, handler)
+
+	mux.routes[HttpMethodAny] = append(mux.routes[HttpMethodAny], &Route{
+		pattern: regexp.MustCompile(fmt.Sprintf("^%s%s", mux.prefix, pattern)),
+		handler: handler,
+	})
 
 	return useMux
 }
 
-func (mux *HttpMux) addRouteHandler(verb string, pattern string, handler http.Handler) {
-	mux.routes[verb] = append(mux.routes[verb], &Route{
-		pattern: regexp.MustCompile(mux.prefix + pattern),
-		handler: handler,
-	})
+func (mux *HttpMux) addMuxHandler(nestedMux *HttpMux) {
+	mux.routes[HttpMethodAny] = append(mux.routes[HttpMethodAny], nestedMux)
 }
 
-func insertUrlParams(pattern regexp.Regexp, r *http.Request) {
-	match := pattern.FindStringSubmatch(r.URL.Path)
-
-	// Hack to populate r.Form if encoding is set to multipart/form-data
-	r.FormValue("")
-	r.ParseForm()
-
-	for i, name := range pattern.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			r.Form.Add(name, match[i])
-		}
-	}
+func (mux *HttpMux) addRouteHandler(verb string, pattern string, handler http.Handler) {
+	mux.routes[verb] = append(mux.routes[verb], &Route{
+		pattern: regexp.MustCompile(fmt.Sprintf("^%s%s$", mux.prefix, pattern)),
+		handler: handler,
+	})
 }

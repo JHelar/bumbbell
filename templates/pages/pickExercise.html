@@ -3,63 +3,6 @@
   {{ template "head" . }}
   <body class="bg-white dark:bg-zinc-800 dark">
     {{ template "header" .Header }}
-    <main
-      class="grid grid-cols-3 grid-rows-[auto_minmax(0,_1fr)] gap-8 py-8 px-4 mx-auto max-w-screen-xl"
-      id="container"
-    >
-      <section
-        class="md:col-span-2 col-span-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
-      >
-        <h1
-          class="leading-none text-gray-900 dark:text-white text-3xl md:text-5xl font-extrabold mb-2"
-        >
-          {{ .ActiveWorkout.Name }}
-        </h1>
-        <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-6">
-          {{ .ActiveWorkout.Description }}
-        </p>
-        <dl
-          class="grid grid-cols-[auto_minmax(0,_1fr)] gap-x-2 gap-y-4 leading-none text-gray-900 dark:text-white"
-        >
-          <dt class="text-gray-500 dark:text-gray-400">Started</dt>
-          <dd class="font-extrabold">{{ .WorkoutStart }}</dd>
-          <dt class="text-gray-500 dark:text-gray-400">Duration</dt>
-          <dd
-            class="font-extrabold"
-            id="workout-duration"
-            data-start="{{ .WorkoutStartedAt }}"
-          >
-            {{ .WorkoutDuration }}
-          </dd>
-        </dl>
-        <script>
-          initDurationCounter("#workout-duration");
-        </script>
-      </section>
-      <section
-        class="md:col-span-2 col-span-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
-      >
-        <h2
-          class="leading-none text-gray-900 dark:text-white text-2xl md:text-2xl font-extrabold mb-6"
-        >
-          Start an exercise
-        </h2>
-        <div class="grid grid-flow-col auto-cols-fr gap-8">
-          {{ range .Exercises }}
-            {{ template "exerciseCard" . }}
-          {{ end }}
-        </div>
-      </section>
-      <section
-        class="md:col-start-3 md:col-end-4 md:row-start-1 md:row-end-3 col-span-full self-stretch flex flex-col max-h-full h-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
-      >
-        <h2
-          class="leading-none text-gray-900 dark:text-white text-2xl md:text-2xl font-extrabold mb-6"
-        >
-          Progress
-        </h2>
-        {{ template "activeWorkoutChart" .ActiveWorkout }}
-      </section>
-    </main>
+    {{ template "workoutContainer" . }}
   </body>
 </html>
