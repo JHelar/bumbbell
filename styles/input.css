@@ -48,23 +48,166 @@ main.htmx-settling {
   }
 }
 
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-90px);
+  }
+}
+
 @keyframes slide-to-left {
   to {
     transform: translateX(-90px);
   }
 }
 
-::view-transition-old(slide-it) {
+@keyframes slide-to-right {
+  to {
+    transform: translateX(90px);
+  }
+}
+
+@keyframes slide-from-down {
+  from {
+    transform: translateY(90px);
+  }
+}
+
+@keyframes slide-to-up {
+  to {
+    transform: translateY(-90px);
+  }
+}
+
+@keyframes slide-from-up {
+  from {
+    transform: translateY(-90px);
+  }
+}
+
+@keyframes slide-to-down {
+  to {
+    transform: translateY(90px);
+  }
+}
+
+@keyframes from-small {
+  from {
+    transform: scale(0.55);
+  }
+}
+
+@keyframes to-small {
+  to {
+    transform: scale(0.55);
+  }
+}
+
+::view-transition-old(exercise):only-child {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both to-small;
+}
+::view-transition-new(exercise):only-child {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both from-small;
+}
+
+::view-transition-old(header):only-child {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-up;
+}
+
+::view-transition-new(header):only-child {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-up;
+}
+
+::view-transition-old(from-top) {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-up;
+}
+
+::view-transition-new(from-top) {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-up;
+}
+::view-transition-old(from-bottom) {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-down;
+}
+
+::view-transition-new(from-bottom) {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-down;
+}
+
+::view-transition-old(from-left) {
   animation:
     180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
     600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
 }
-::view-transition-new(slide-it) {
+
+::view-transition-new(from-left) {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-left;
+}
+
+::view-transition-old(from-right) {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-right;
+}
+
+::view-transition-new(from-right) {
   animation:
     420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
     600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
 }
 
-.sample-transition {
-  view-transition-name: slide-it;
+::view-transition-old(from-small) {
+  animation:
+    180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both to-small;
+}
+
+::view-transition-new(from-small) {
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both from-small;
+}
+
+.exercise-transition {
+  view-transition-name: exercise;
+}
+
+.header-transition {
+  view-transition-name: header;
+}
+
+.from-left-transition {
+  view-transition-name: from-left;
+}
+
+.from-right-transition {
+  view-transition-name: from-right;
+}
+
+.from-top-transition {
+  view-transition-name: from-top;
+}
+
+.from-bottom-transition {
+  view-transition-name: from-bottom;
+}
+
+.from-small-transition {
+  view-transition-name: from-small;
 }

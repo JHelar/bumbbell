@@ -169,3 +169,8 @@ type HeaderModel struct {
 	UserImageSrc string
 	UserEmail    string
 }
+
+type BannerModel struct {
+	SwapTarget  string
+	Description string
+}

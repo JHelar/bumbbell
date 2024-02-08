@@ -2,10 +2,11 @@
   <main
     class="grid grid-cols-3 gap-8 py-8 px-4 mx-auto max-w-screen-xl"
     id="container"
+    hx-swap-oob="true"
   >
     <section class="md:col-span-2 col-span-full">
       <div
-        class="grid grid-cols-[minmax(0,_1fr)_minmax(0,_1fr)_max-content] gap-8 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 mb-8"
+        class="grid grid-cols-[minmax(0,_1fr)_minmax(0,_1fr)_max-content] gap-8 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 mb-8 from-top-transition"
       >
         <div class="col-span-full sm:col-span-2">
           <h1
@@ -45,6 +46,10 @@
             </script>
             <a
               href="/workout"
+              hx-get="/workout"
+              hx-swap="none"
+              hx-trigger="click"
+              hx-push-url="true"
               class="inline-flex justify-center items-center py-2.5 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900"
             >
               Continue workout
@@ -79,8 +84,12 @@
           </div>
         {{ end }}
       </div>
-      <div class="grid md:grid-cols-2 gap-8">
-        {{ template "workoutActivityChart" .WorkoutActivity }}
+      <div class="grid md:grid-cols-2 gap-8 from-bottom-transition">
+        <div
+          class="overflow-hidden bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
+        >
+          {{ template "workoutActivityChart" .WorkoutActivity }}
+        </div>
         <div
           class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
         >
@@ -180,7 +189,9 @@
         </div>
       </div>
     </section>
-    <section class="md:col-start-3 md:col-end-4 col-span-full self-stretch">
+    <section
+      class="md:col-start-3 md:col-end-4 col-span-full self-stretch from-right-transition"
+    >
       <div
         class="flex flex-col max-h-full h-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 overflow-hidden"
       >

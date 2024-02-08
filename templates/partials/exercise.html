@@ -1,5 +1,9 @@
 {{ define "exercise" }}
-  <main class="h-dvh p-6 grid place-items-center" id="container">
+  <main
+    class="h-dvh p-6 grid place-items-center exercise-transition"
+    id="container"
+    hx-swap-oob="outerHTML"
+  >
     <div
       class="max-w-md flex flex-col justify-end container flex-grow-0 flex-shrink-0 rounded-lg overflow-hidden shadow"
     >

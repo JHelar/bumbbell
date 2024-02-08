@@ -21,20 +21,41 @@ var Partials = template.Must(template.New("partials").Funcs(templateFunctions).P
 var StartWorkout = template.Must(Partials.New("startWorkout").Parse(`
 	<title>{{ .Title }}</title>
 	<div hx-swap-oob="delete:#page-header"></div>
-	<div hx-swap-oob="outerHTML:#container">{{ template "exercise" .Exercise }}</div>
+	{{ template "exercise" .Exercise }}
 `))
 var PickWorkout = template.Must(Partials.New("pickWorkout").Parse(`
 	<title>{{ .Title }}</title>
+	<div hx-swap-oob="delete:#page-header"></div>
 	<div hx-swap-oob="afterbegin:body">{{ template "header" .Header }}</div>
-	<div hx-swap-oob="outerHTML:#container">{{ template "workoutContainer" . }}</div>
+	{{ template "workoutContainer" . }}
 `))
 var NextExercise = template.Must(Partials.New("nextExercise").Parse(`
 	{{ template "exerciseSets" . }}
 `))
 var Home = template.Must(Partials.New("home").Parse(`
 	<title>{{ .Title }}</title>
+	<div hx-swap-oob="delete:#page-header"></div>
 	<div hx-swap-oob="afterbegin:body">{{ template "header" .Header }}</div>
-	<div hx-swap-oob="outerHTML:#container">{{ template "dashboardContainer" . }}</div>
+	{{ template "dashboardContainer" . }}
+`))
+var Login = template.Must(Partials.New("login").Parse(`
+	<title>{{ .Title }}</title>
+	<div hx-swap-oob="delete:#page-header"></div>
+	{{ template "loginContainer" . }}
+`))
+var Signup = template.Must(Partials.New("signup").Parse(`
+	<title>{{ .Title }}</title>
+	<div hx-swap-oob="delete:#page-header"></div>
+	{{ template "signupContainer" . }}
+`))
+var Settings = template.Must(Partials.New("settings").Parse(`
+	<title>{{ .Title }}</title>
+	<div hx-swap-oob="delete:#page-header"></div>
+	<div hx-swap-oob="afterbegin:body">{{ template "header" .Header }}</div>
+	{{ template "settingsContainer" . }}
+`))
+var AlertBanner = template.Must(Partials.New("userCredentialsError").Parse(`
+	{{ template "alertBanner" . }}
 `))
 
 func ExecutePageTemplate(wr io.Writer, templateName string, data any) error {

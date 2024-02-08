@@ -1,9 +1,15 @@
 {{ define "header" }}
   <header
-    class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
+    class="sticky z-50 max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 header-transition"
     id="page-header"
   >
-    <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+    <a
+      href="/"
+      hx-get="/"
+      hx-swap="none"
+      hx-push-url="true"
+      class="flex items-center space-x-3 rtl:space-x-reverse"
+    >
       <img src="/public/images/dumbbell.png" class="h-8" alt="Dumbbell logo" />
       <span
         class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
@@ -35,9 +41,6 @@
           id="user-dropdown"
         >
           <div class="px-4 py-3">
-            <!-- <span class="block text-sm text-gray-900 dark:text-white"
-      >Bonnie Green</span
-    > -->
             <span
               class="block text-sm  text-gray-500 truncate dark:text-gray-400"
               >{{ .UserEmail }}</span
@@ -47,6 +50,9 @@
             <li>
               <a
                 href="/"
+                hx-get="/"
+                hx-swap="none"
+                hx-push-url="true"
                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                 >Dashboard</a
               >
@@ -54,6 +60,9 @@
             <li>
               <a
                 href="/user"
+                hx-get="/user"
+                hx-swap="none"
+                hx-push-url="true"
                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                 >Settings</a
               >
@@ -61,6 +70,8 @@
             <li>
               <a
                 href="/logout"
+                hx-get="/logout"
+                hx-swap="none"
                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                 >Sign out</a
               >

@@ -24,14 +24,18 @@ func (s *HttpServer) startWorkoutHandler(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Add("HX-Reselect", "#container")
-	w.Header().Add("HX-Retarget", "#container")
-	w.Header().Add("HX-Reswap", "outerHTML")
-	w.Header().Add("HX-Trigger-After-Swap", "updateCharts")
 
-	err = templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
-	if err != nil {
-		log.Printf("Error: in here %s", err.Error())
+	pickExerciseData.Header = s.SessionService.GetHeaderModel(r)
+
+	var templateErr error
+	if s.HtmxService.IsHtmxRequest(r) {
+		templateErr = templates.PickWorkout.Execute(w, pickExerciseData)
+	} else {
+		templateErr = templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
+	}
+
+	if templateErr != nil {
+		log.Printf("Start workout handler Error: %s", templateErr.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -202,7 +206,7 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 				sets = append(sets, dto.SetUncompleted)
 			}
 
-			templateErr := templates.ExecutePageTemplate(w, "exercise.html", map[string]interface{}{
+			viewModel := map[string]interface{}{
 				"Title": fmt.Sprintf("Dumbbell - %s", exercise.Name),
 				"Exercise": model.ExerciseViewModel{
 					Name:        exercise.Name,
@@ -218,9 +222,17 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 						Htmx:  false,
 					},
 				},
-			})
+			}
+
+			var templateErr error
+			if s.HtmxService.IsHtmxRequest(r) {
+				templateErr = templates.StartWorkout.Execute(w, viewModel)
+			} else {
+				templateErr = templates.ExecutePageTemplate(w, "exercise.html", viewModel)
+			}
+
 			if templateErr != nil {
-				log.Printf("Error: in here %s", templateErr.Error())
+				log.Printf("Workout page handler Error: %s", templateErr.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 			return
@@ -240,10 +252,15 @@ func (s *HttpServer) workoutPageHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
+		var templateErr error
 		pickExerciseData.Header = s.SessionService.GetHeaderModel(r)
-		templateErr := templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
+		if s.HtmxService.IsHtmxRequest(r) {
+			templateErr = templates.PickWorkout.Execute(w, pickExerciseData)
+		} else {
+			templateErr = templates.ExecutePageTemplate(w, "pickExercise.html", pickExerciseData)
+		}
 		if templateErr != nil {
-			log.Printf("Error: in here %s", templateErr.Error())
+			log.Printf("Workout page handler Error: %s", templateErr.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return

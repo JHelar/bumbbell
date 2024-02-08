@@ -268,11 +268,21 @@ func (s *HttpServer) settingsPageHandler(w http.ResponseWriter, r *http.Request)
 		})
 	}
 
-	if err = templates.ExecutePageTemplate(w, "user.html", model.UserSettingsModel{
+	viewModel := model.UserSettingsModel{
 		Title:  "Dumbbell - Settings",
 		Splits: splitModels,
 		Header: s.SessionService.GetHeaderModel(r),
-	}); err != nil {
-		log.Printf("Error userHandler %s", err.Error())
+	}
+
+	var templateErr error
+	if s.HtmxService.IsHtmxRequest(r) {
+		templateErr = templates.Settings.Execute(w, viewModel)
+	} else {
+		templateErr = templates.ExecutePageTemplate(w, "user.html", viewModel)
+	}
+
+	if templateErr != nil {
+		log.Printf("Error in settings template: %s", templateErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

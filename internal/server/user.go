@@ -54,8 +54,15 @@ func (s *HttpServer) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Remember: true,
 	})
 	if loginErr != nil {
-		log.Printf("Error logging in user: %s", loginErr.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		if loginErr == service.InvalidCredentialsError {
+			templates.AlertBanner.Execute(w, model.BannerModel{
+				SwapTarget:  "afterend:#container h1",
+				Description: "Invalid credentials",
+			})
+		} else {
+			log.Printf("Error logging in user: %s", loginErr.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -89,10 +96,23 @@ func (s *HttpServer) loginPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.ExecutePageTemplate(w, "login.html", model.LoginPageModel{
+	viewModel := model.LoginPageModel{
 		Title:  "Dumbbell - Login",
 		Header: s.SessionService.GetHeaderModel(r),
-	})
+	}
+
+	var templateErr error
+	if s.HtmxService.IsHtmxRequest(r) {
+		templateErr = templates.Login.Execute(w, viewModel)
+	} else {
+		templateErr = templates.ExecutePageTemplate(w, "login.html", viewModel)
+	}
+
+	if templateErr != nil {
+		log.Printf("Login page handler Error: %s", templateErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
 }
 
 func (s *HttpServer) signupPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,8 +121,20 @@ func (s *HttpServer) signupPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.ExecutePageTemplate(w, "signup.html", model.LoginPageModel{
+	viewModel := model.LoginPageModel{
 		Title:  "Dumbbell - Signup",
 		Header: s.SessionService.GetHeaderModel(r),
-	})
+	}
+
+	var templateErr error
+	if s.HtmxService.IsHtmxRequest(r) {
+		templateErr = templates.Signup.Execute(w, viewModel)
+	} else {
+		templateErr = templates.ExecutePageTemplate(w, "signup.html", viewModel)
+	}
+
+	if templateErr != nil {
+		log.Printf("Signup page handler Error: %s", templateErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

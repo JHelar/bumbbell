@@ -11,21 +11,32 @@
             <div
               class="z-10 flex items-center justify-center w-6 h-6 bg-emerald-600 rounded-full ring-0 ring-white dark:bg-emerald-800 sm:ring-8 dark:ring-gray-900 shrink-0"
             ></div>
+            {{ if isNotLast $index $.Items }}
+              <div
+                class="flex w-full bg-emerald-200 h-0.5 dark:bg-emerald-700"
+              ></div>
+            {{ end }}
           {{ else if eq $element "bad" }}
             <div
               class="z-10 flex items-center justify-center w-6 h-6 bg-rose-600 rounded-full ring-0 ring-white dark:bg-rose-800 sm:ring-8 dark:ring-gray-900 shrink-0"
             ></div>
+            {{ if isNotLast $index $.Items }}
+              <div class="flex w-full bg-rose-200 h-0.5 dark:bg-rose-700"></div>
+            {{ end }}
           {{ else if eq $element "current" }}
             <div
               class="z-10 flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full ring-0 ring-white dark:bg-blue-800 sm:ring-8 dark:ring-gray-900 shrink-0"
             ></div>
+            {{ if isNotLast $index $.Items }}
+              <div class="flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"></div>
+            {{ end }}
           {{ else }}
             <div
               class="z-10 flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full ring-0 ring-white dark:bg-gray-700 sm:ring-8 dark:ring-gray-900 shrink-0"
             ></div>
-          {{ end }}
-          {{ if isNotLast $index $.Items }}
-            <div class="flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"></div>
+            {{ if isNotLast $index $.Items }}
+              <div class="flex w-full bg-gray-200 h-0.5 dark:bg-gray-700"></div>
+            {{ end }}
           {{ end }}
         </div>
       </li>
@@ -49,7 +60,7 @@
       class="group inline-flex place-items-center place-content-center w-full p-4 bg-gray-50 hover:bg-rose-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-rose-800"
     >
       <svg
-        class="h-8 w-8 text-rose-400 inline-block group-hover:hidden"
+        class="h-8 w-8 text-rose-400 inline-block group-hover:hidden group-active:scale-75 transition-transform"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -64,7 +75,7 @@
         />
       </svg>
       <svg
-        class="h-8 w-8 text-rose-400 hidden group-hover:inline-block"
+        class="h-8 w-8 text-rose-400 hidden group-hover:inline-block group-active:scale-75 transition-transform"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -89,7 +100,7 @@
       class="group inline-flex place-items-center place-content-center w-full p-4 bg-gray-50 hover:bg-emerald-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-emerald-800"
     >
       <svg
-        class="w-8 h-8 text-emerald-400 inline-block group-hover:hidden"
+        class="w-8 h-8 text-emerald-400 inline-block group-hover:hidden group-active:scale-75 transition-transform"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -104,7 +115,7 @@
         />
       </svg>
       <svg
-        class="w-8 h-8 text-emerald-400 hidden group-hover:inline-block"
+        class="w-8 h-8 text-emerald-400 hidden group-hover:inline-block group-active:scale-75 transition-transform"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"

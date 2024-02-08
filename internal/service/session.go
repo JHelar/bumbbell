@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"dumbbell/internal/dto"
 	"dumbbell/internal/model"
+	"errors"
 	"log"
 	"net/http"
 
@@ -13,6 +14,8 @@ import (
 )
 
 var SESSION_COOKIE_NAME = "user-session"
+
+var InvalidCredentialsError = errors.New("Invalid credentials")
 
 type SessionService struct {
 	DB    *sql.DB
@@ -40,12 +43,15 @@ type LoginUserData struct {
 func (s *SessionService) LoginUser(w http.ResponseWriter, r *http.Request, data LoginUserData) error {
 	user, getUserErr := dto.GetUserByEmail(data.Email, s.DB)
 	if getUserErr != nil {
+		if getUserErr == sql.ErrNoRows {
+			return InvalidCredentialsError
+		}
 		return getUserErr
 	}
 
 	authUserErr := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(data.Password))
 	if authUserErr != nil {
-		return authUserErr
+		return InvalidCredentialsError
 	}
 
 	session, getSessionErr := s.Store.Get(r, SESSION_COOKIE_NAME)
@@ -93,7 +99,8 @@ func (s *SessionService) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if session.Values["user_id"] == nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			log.Printf("User not authenticated")
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
