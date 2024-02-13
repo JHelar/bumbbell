@@ -126,7 +126,7 @@ func (mux *HttpMux) MatchesPath(path string) bool {
 }
 
 func (mux *HttpMux) InsertUrlParams(r *http.Request) {
-	// Stump
+	// Stub
 }
 
 func (mux *HttpMux) Use(pattern string, middlewares ...func(http.Handler) http.Handler) *HttpMux {
@@ -136,7 +136,7 @@ func (mux *HttpMux) Use(pattern string, middlewares ...func(http.Handler) http.H
 		handler = middleware(handler)
 	}
 
-	mux.routes[HttpMethodAny] = append(mux.routes[HttpMethodAny], &Route{
+	mux.addRoute(HttpMethodAny, &Route{
 		pattern: regexp.MustCompile(fmt.Sprintf("^%s%s", mux.prefix, pattern)),
 		handler: handler,
 	})
@@ -144,12 +144,12 @@ func (mux *HttpMux) Use(pattern string, middlewares ...func(http.Handler) http.H
 	return useMux
 }
 
-func (mux *HttpMux) addMuxHandler(nestedMux *HttpMux) {
-	mux.routes[HttpMethodAny] = append(mux.routes[HttpMethodAny], nestedMux)
+func (mux *HttpMux) addRoute(verb string, handler MuxHandler) {
+	mux.routes[verb] = append(mux.routes[verb], handler)
 }
 
 func (mux *HttpMux) addRouteHandler(verb string, pattern string, handler http.Handler) {
-	mux.routes[verb] = append(mux.routes[verb], &Route{
+	mux.addRoute(verb, &Route{
 		pattern: regexp.MustCompile(fmt.Sprintf("^%s%s$", mux.prefix, pattern)),
 		handler: handler,
 	})
