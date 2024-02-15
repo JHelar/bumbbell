@@ -1,0 +1,94 @@
+name: "Publish"
+
+on: 
+  workflow_dispatch:
+    inputs:
+      app-version:
+        description: "App version"
+        required: true
+        default: "0.0.0"
+
+jobs:
+  app-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21.6
+      
+      - name: Set app version
+        run: ./scripts/bump-version.sh ${{ github.event.inputs.app-version }}
+
+      - name: Commit and push version
+        run: |
+          git config --global user.email ""
+          git config --global user.name "GitHub Actions"
+          git add main.go
+          git commit -m "chore: update app version [skip ci]"
+          git push
+
+  build-and-push-image:
+    needs: app-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set app version
+        run: echo "APP_VERSION=$(go run main.go --version)" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push docker image to Amazon ECR Public
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: dumbbell
+          IMAGE_TAG: ${{ github.event.inputs.app-version }}
+        run: |
+          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Apply terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform apply
+        env:
+          TF_VAR_APP_VERSION: ${{ github.event.inputs.app-version }}
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Commit and push tfstate
+        run: |
+          git config --global user.email ""
+          git config --global user.name "GitHub Actions"
+          git add tfstate.tf tfstate.tf.backup
+          git commit -m "chore: update tfstate.tf and tfstate.tf.backup files [skip ci]"
+          git push
