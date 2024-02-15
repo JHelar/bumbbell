@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"dumbbell/internal/environment"
 	"html/template"
 	"io"
 	"reflect"
@@ -12,6 +13,9 @@ var templateFunctions = template.FuncMap{
 	},
 	"isNotLast": func(x int, a interface{}) bool {
 		return x != reflect.ValueOf(a).Len()-1
+	},
+	"isDev": func() bool {
+		return environment.GetEnvironment() == environment.Development
 	},
 }
 

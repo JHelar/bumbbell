@@ -5,8 +5,8 @@ import "net/http"
 type HtmxService struct {
 }
 
-func NewHtmxService() HtmxService {
-	return HtmxService{}
+func NewHtmxService() *HtmxService {
+	return &HtmxService{}
 }
 
 func (s *HtmxService) IsHtmxRequest(r *http.Request) bool {

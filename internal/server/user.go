@@ -14,6 +14,12 @@ func (s *HttpServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirm-password")
 
+	if email == "" || password == "" || confirmPassword == "" {
+		log.Printf("Invalid form data")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if password != confirmPassword {
 		log.Printf("Passwords do not match")
 		w.WriteHeader(http.StatusBadRequest)

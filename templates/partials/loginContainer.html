@@ -1,5 +1,8 @@
 {{ define "loginContainer" }}
   <form
+    method="post"
+    enctype="multipart/form-data"
+    hx-encoding="multipart/form-data"
     hx-post="/login"
     hx-swap="none"
     hx-trigger="submit"

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"dumbbell/internal/db"
 	"dumbbell/internal/dto"
+	"dumbbell/internal/environment"
 	"dumbbell/internal/mux"
 	"dumbbell/internal/service"
 	"fmt"
@@ -17,10 +18,10 @@ import (
 
 type HttpServer struct {
 	DB              *sql.DB
-	WorkoutService  service.WorkoutService
-	ExerciseService service.ExerciseService
-	SessionService  service.SessionService
-	HtmxService     service.HtmxService
+	WorkoutService  *service.WorkoutService
+	ExerciseService *service.ExerciseService
+	SessionService  *service.SessionService
+	HtmxService     *service.HtmxService
 }
 
 var upgrader = websocket.Upgrader{}
@@ -122,11 +123,14 @@ func NewServer() (*http.Server, error) {
 	handler.PostFunc("/signup", server.RegisterUser)
 	handler.GetFunc("/logout", server.LogoutUser)
 
-	handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
+	if environment.GetEnvironment() == environment.Development {
+		handler.HandleFunc("/ws/hotreload", makeHMREndpoint())
+	}
+
 	handler.HandleFunc("/", server.homeHandler)
 
 	return &http.Server{
-		Addr:    ":8080",
+		Addr:    environment.GetServerPort(),
 		Handler: handler,
 	}, nil
 }

@@ -8,6 +8,6 @@ type ExerciseService struct {
 	DB *sql.DB
 }
 
-func NewExerciseService(db *sql.DB) ExerciseService {
-	return ExerciseService{DB: db}
+func NewExerciseService(db *sql.DB) *ExerciseService {
+	return &ExerciseService{DB: db}
 }

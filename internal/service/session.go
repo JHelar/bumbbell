@@ -22,13 +22,13 @@ type SessionService struct {
 	Store *sqlitestore.SqliteStore
 }
 
-func NewSessionService(db *sql.DB) SessionService {
+func NewSessionService(db *sql.DB) *SessionService {
 	store, err := sqlitestore.NewSqliteStoreFromConnection(db, "user_sessions", "/", 0, []byte("NOT_SO_SECRET_KEY"))
 	if err != nil {
 		panic(err)
 	}
 
-	return SessionService{
+	return &SessionService{
 		DB:    db,
 		Store: store,
 	}

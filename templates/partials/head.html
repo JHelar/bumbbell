@@ -11,13 +11,17 @@
     <link rel="icon" href="/public/images/dumbbell.png" />
 
     <link href="/public/output.css" rel="stylesheet" />
-    <script src="/public/hmr.js" type="text/javascript"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/debug.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="/public/charts.js" type="text/javascript"></script>
     <script src="/public/duration.js" type="text/javascript"></script>
     <script src="/public/flowbite.js" type="text/javascript"></script>
+    {{ if isDev }}
+      <script src="/public/hmr.js" type="text/javascript"></script>
+    {{ end }}
+
+
     <script type="text/javascript">
       htmx.config.useTemplateFragments = true;
       htmx.config.globalViewTransitions = true;

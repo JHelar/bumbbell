@@ -4,12 +4,6 @@ set -e
 
 cd db
 
-echo "Create database"
-sqlite-utils create-database database.db
-
-echo "Create tables"
-sqlite3 database.db < schema.sql
-
 echo "Seed users table"
 sqlite-utils insert database.db users seed/users.json --truncate
 

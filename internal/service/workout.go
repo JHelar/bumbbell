@@ -30,8 +30,8 @@ type WorkoutService struct {
 	DB *sql.DB
 }
 
-func NewWorkoutService(db *sql.DB) WorkoutService {
-	return WorkoutService{DB: db}
+func NewWorkoutService(db *sql.DB) *WorkoutService {
+	return &WorkoutService{DB: db}
 }
 
 func (s *WorkoutService) GetActiveWorkoutData(userId int64, workoutId int64) (model.ActiveWorkoutModel, error) {

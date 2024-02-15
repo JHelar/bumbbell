@@ -46,6 +46,6 @@ CREATE TABLE IF NOT EXISTS "images" (
    [Content] BLOB NOT NULL,
    [ContentType] TEXT NOT NULL 
 );
-CREATE TRIGGER on_exercise_delete AFTER DELETE ON exercises BEGIN
+CREATE TRIGGER IF NOT EXISTS on_exercise_delete AFTER DELETE ON exercises BEGIN
   DELETE FROM images WHERE ID = old.ImageID;
 END;

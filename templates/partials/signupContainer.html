@@ -1,5 +1,8 @@
 {{ define "signupContainer" }}
   <form
+    method="post"
+    enctype="multipart/form-data"
+    hx-encoding="multipart/form-data"
     hx-post="/signup"
     hx-swap="none"
     hx-trigger="submit"
