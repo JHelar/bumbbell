@@ -155,3 +155,8 @@ resource "aws_instance" "dumbbell_web_server" {
     Name = "dumbbell - Web Server"
   }
 }
+
+resource "aws_eip" "dumbbell_web_server_eip" {
+  instance = aws_instance.dumbbell_web_server.id
+  domain   = "vpc"
+}
